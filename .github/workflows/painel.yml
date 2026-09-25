@@ -1,0 +1,68 @@
+name: Painel
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: painel-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  EXERCICIO: "2026"
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q
+
+  gerar:
+    needs: testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Gerar painel
+        run: |
+          mkdir -p _site
+          # Usa os dados reais do repositório (dados/tratados, dados/entrada_manual) quando
+          # existirem; senão, os dados ilustrativos (o painel mostra o aviso de dados fictícios).
+          if [ -e dados/tratados/"$EXERCICIO".json ] || [ -e dados/entrada_manual/"$EXERCICIO".yaml ]; then
+            python -m painel_fiscal painel --exercicio "$EXERCICIO" --saida _site/index.html
+          else
+            python -m painel_fiscal painel --exercicio "$EXERCICIO" \
+              --dados exemplos/dados_ilustrativos_"$EXERCICIO".yaml --saida _site/index.html
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  publicar:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: gerar
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

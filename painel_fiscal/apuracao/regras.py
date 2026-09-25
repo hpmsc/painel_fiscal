@@ -381,15 +381,43 @@ def r08_regra_de_ouro(regra, ctx: Contexto) -> Resultado:
     return res
 
 
+def _somar_poderes(ctx: Contexto, prefixo: str) -> None:
+    """Sem `{prefixo}_total_bi`, soma os Poderes do R10 (todos precisam estar presentes)."""
+    if _preferida(ctx.base, f"{prefixo}_total_bi"):
+        return
+    poderes = list((ctx.parametros.regra("R10").get("limites") or {}))
+    obs = [_preferida(ctx.base, f"{prefixo}_{p}_bi") for p in poderes]
+    if poderes and all(obs):
+        ctx.base.adicionar([Observacao(
+            indicador=f"{prefixo}_total_bi", valor=sum(o.valor for o in obs),
+            data_referencia=min(o.data_referencia for o in obs),
+            data_coleta=max((o.data_coleta for o in obs if o.data_coleta), default=None),
+            fonte="soma dos Poderes (RGF Anexo 1)", tipo=obs[0].tipo)])
+
+
 def r09_pessoal_total(regra, ctx):
+    _somar_poderes(ctx, "dtp")
     return _razao_sobre(regra, ctx, "dtp_total_bi", "rcl_bi", regra.get("limite"),
                         "maximo", "percentual")
 
 
 def r10_pessoal_poder(regra, ctx: Contexto) -> Resultado:
     detalhes = []
+    rcl = _preferida(ctx.base, "rcl_bi")
     for poder, limite in (regra.get("limites") or {}).items():
-        d = _razao_sobre(regra, ctx, f"dtp_{poder}_bi", "rcl_bi", limite, "maximo", "percentual")
+        dtp = _preferida(ctx.base, f"dtp_{poder}_bi")
+        oficial = _preferida(ctx.base, f"limite_dtp_{poder}_bi")
+        if dtp and oficial and rcl:
+            # limite oficial do RGF (soma dos blocos do Poder), convertido em fração da RCL
+            limite_rcl = oficial.valor / rcl.valor
+            d = _novo(regra, st.percentual(dtp.valor / oficial.valor, ctx.niveis),
+                      valor=dtp.valor / rcl.valor, unidade="fracao", limite=limite_rcl,
+                      tipo_limite="maximo", folga=limite_rcl - dtp.valor / rcl.valor,
+                      **_datas(dtp, oficial, rcl))
+            d.extras["uso_do_limite"] = dtp.valor / oficial.valor
+            d.notas.append("Limite oficial informado no RGF.")
+        else:
+            d = _razao_sobre(regra, ctx, f"dtp_{poder}_bi", "rcl_bi", limite, "maximo", "percentual")
         d.nome = poder
         detalhes.append(d)
     com_dados = [d for d in detalhes if d.status != st.SEM_DADOS]
@@ -461,13 +489,36 @@ def r15_trajetoria_divida(regra, ctx: Contexto) -> Resultado:
     return res
 
 
+def _minimo_aplicado(regra, ctx: Contexto, aplicado: str, minimo: str, denominador: str) -> Resultado:
+    """Mínimos constitucionais. Com o valor mínimo publicado no RREO (Anexo 14 da União),
+    a base é mínimo ÷ piso e o % aplicado = aplicado ÷ base. Sem ele, aplicado ÷ denominador."""
+    ap = _preferida(ctx.base, aplicado)
+    mi = _preferida(ctx.base, minimo)
+    piso = regra.get("limite")
+    if ap is None or mi is None or not piso:
+        return _razao_sobre(regra, ctx, aplicado, denominador, piso, "minimo", "minimo")
+    base_calc = mi.valor / piso
+    pct = ap.valor / base_calc
+    res = _novo(regra, st.minimo(pct, piso), valor=pct, unidade="fracao", limite=piso,
+                tipo_limite="minimo", folga=pct - piso, **_datas(ap, mi))
+    res.extras.update({"aplicado_bi": ap.valor, "minimo_bi": mi.valor, "uso_do_minimo": ap.valor / mi.valor})
+    res.notas.append(f"Aplicado R$ {_br(ap.valor)} bi; mínimo R$ {_br(mi.valor)} bi "
+                     f"({_br(ap.valor / mi.valor * 100)}% do mínimo).")
+    if ap.data_referencia < dt.date(ctx.exercicio, 12, 1):
+        res.notas.append("Apuração até o bimestre; o mínimo é anual.")
+    return res
+
+
+def _br(v: float) -> str:
+    return f"{v:,.1f}".replace(",", "\u0001").replace(".", ",").replace("\u0001", ".")
+
+
 def r16_saude(regra, ctx):
-    return _razao_sobre(regra, ctx, "asps_bi", "rcl_bi", regra.get("limite"), "minimo", "minimo")
+    return _minimo_aplicado(regra, ctx, "asps_bi", "asps_minimo_bi", "rcl_bi")
 
 
 def r17_educacao(regra, ctx):
-    return _razao_sobre(regra, ctx, "mde_bi", "receita_liquida_impostos_bi",
-                        regra.get("limite"), "minimo", "minimo")
+    return _minimo_aplicado(regra, ctx, "mde_bi", "mde_minimo_bi", "receita_liquida_impostos_bi")
 
 
 # Ordem importa: R06 usa R01; R02 pode usar R03; R11 usa R09/R10.

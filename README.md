@@ -19,8 +19,8 @@ python -m painel_fiscal painel --exercicio 2026 --dados exemplos/dados_ilustrati
 
 # coleta (grava bruto em dados/brutos/AAAA-MM-DD/ e acrescenta em dados/tratados/<ano>.json)
 python -m painel_fiscal coletar-bcb --exercicio 2026 --desde 2025-01-01
-python -m painel_fiscal coletar-siconfi --exercicio 2026 --demonstrativo rgf --periodo 2
-python -m painel_fiscal coletar-siconfi --exercicio 2026 --demonstrativo rreo --periodo 4
+python -m painel_fiscal coletar-siconfi --exercicio 2026 --demonstrativo rgf --periodo 1 2 3
+python -m painel_fiscal coletar-siconfi --exercicio 2026 --demonstrativo rreo --periodo 1 2 3 4 5 6
 
 # dados sem API (Relatório Bimestral, LOA, LDO): dados/entrada_manual/<ano>.yaml
 # (mesmo formato de exemplos/dados_ilustrativos_2026.yaml, sem "ilustrativo: true")
@@ -40,6 +40,22 @@ GitHub Pages. Usa os dados de `dados/tratados/` e `dados/entrada_manual/` quando
 senão, os dados ilustrativos (com o aviso de dados fictícios na página).
 
 Para ativar: *Settings → Pages → Build and deployment → Source: GitHub Actions*.
+
+## Coleta automática
+
+O workflow `.github/workflows/coleta.yml` roda toda segunda-feira (e sob demanda em
+*Actions → Coleta → Run workflow*). Coleta o BCB (primário do Governo Central, DBGG, DLSP)
+o SICONFI (RGF e RREO da União, todos os períodos já publicados) e o SIOP (dados abertos
+do orçamento, pelo pacote R `orcamentoBR`, sem credencial), grava as observações
+novas em `dados/tratados/<ano>.json` com commit na `main` e, ao terminar, dispara o
+workflow Painel, que republica a página. Coletas repetidas não duplicam dados; valores
+revisados pela fonte ficam registrados como nova observação.
+
+As fontes sem API (Relatório Bimestral, LOA, LDO) continuam em
+`dados/entrada_manual/<ano>.yaml`.
+
+O workflow `.github/workflows/diagnostico.yml` confere as fontes contra um exercício
+fechado e mostra, no resumo do job, se cada item do mapeamento é encontrado.
 
 ## Estrutura
 

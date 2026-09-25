@@ -1,25 +1,43 @@
 # Mapeamento SICONFI → indicadores do painel.
-# ⚠ VERIFICAR TODAS AS ENTRADAS contra uma resposta real da API antes de usar:
-# os rótulos de `conta` e `coluna` seguem o MDF vigente e mudam entre edições.
-# `conta` e `coluna` são expressões regulares (sem diferenciar maiúsculas).
-# `escala` converte R$ → R$ bilhões (padrão 1e-9).
-verificar: true
+# Confirmado contra a API real (diagnóstico de 25/09/2026, exercício 2025, RGF 3º quad. e
+# RREO 6º bim.). Chaves: `cod_conta` (exato, estável entre edições do MDF); `coluna`,
+# `conta` e `instituicao` são regex sem diferenciar maiúsculas; `{periodo}` na coluna vira
+# o número do período; `somar: true` soma as linhas que casarem; `escala` padrão 1e-9 (R$ → R$ bi).
+verificar: false
+
 rgf:
-  - {indicador: rcl_bi,          anexo: "RGF-Anexo 01", conta: "RECEITA CORRENTE L[IÍ]QUIDA",        coluna: "^VALOR"}
-  - {indicador: dtp_total_bi,    anexo: "RGF-Anexo 01", conta: "DESPESA TOTAL COM PESSOAL",          coluna: "^VALOR"}
-  - {indicador: dcl_bi,          anexo: "RGF-Anexo 02", conta: "D[IÍ]VIDA CONSOLIDADA L[IÍ]QUIDA",   coluna: "At[eé] o \\d"}
-  - {indicador: garantias_bi,    anexo: "RGF-Anexo 03", conta: "TOTAL DAS GARANTIAS CONCEDIDAS",     coluna: "At[eé] o \\d"}
-  - {indicador: operacoes_credito_rgf_bi, anexo: "RGF-Anexo 04", conta: "TOTAL CONSIDERADO PARA FINS", coluna: "At[eé] o \\d"}
-# Pessoal por Poder: rodar RGF Anexo 01 com co_poder = E, L, J, M e gravar como
-# dtp_executivo_bi, dtp_legislativo_incl_tcu_bi, dtp_judiciario_bi, dtp_mpu_bi.
+  # RCL: Anexo 4 traz uma única linha (poder E).
+  - {indicador: rcl_bi,                   anexo: "RGF-Anexo 04", cod_conta: RGF4ReceitaCorrenteLiquida, coluna: "^valor$"}
+  - {indicador: operacoes_credito_rgf_bi, anexo: "RGF-Anexo 04", cod_conta: TotalConsideradoParaFinsDaApuracaoDoCumprimentoDoLimiteOperacoesDeCredito, coluna: "^valor$"}
+  - {indicador: limite_operacoes_credito_senado_bi, anexo: "RGF-Anexo 04", cod_conta: LimiteGeralDefinidoPorResolucaoDoSenadoFederalParaAsOperacoesDeCreditoInternasEExternas, coluna: "^valor$"}
+  - {indicador: dcl_bi,                   anexo: "RGF-Anexo 02", cod_conta: DividaConsolidadaLiquida,  coluna: "^at[eé] o {periodo}º quadrimestre"}
+  - {indicador: garantias_bi,             anexo: "RGF-Anexo 03", cod_conta: TotalGarantiasConcedidas,  coluna: "^at[eé] o {periodo}º quadrimestre"}
+  - {indicador: limite_garantias_senado_bi, anexo: "RGF-Anexo 03", cod_conta: LimiteDefinidoPorResolucaoDoSenadoFederal, coluna: "^at[eé] o {periodo}º quadrimestre"}
+
+# Pessoal (RGF Anexo 1) — uma consulta por Poder (co_poder). A API devolve um bloco por
+# instituição/rótulo (Executivo: União, DF, Amapá, Roraima; Legislativo: Câmara, Senado,
+# TCU; Judiciário: cada tribunal; MPU: MPU e MPDFT). Somam-se a DTP e o limite oficial de
+# cada bloco, o que respeita a repartição do art. 20 da LRF (inclusive os 3% do DF/territórios).
 rgf_por_poder:
-  E: dtp_executivo_bi
-  L: dtp_legislativo_incl_tcu_bi
-  J: dtp_judiciario_bi
-  M: dtp_mpu_bi
+  E: executivo
+  L: legislativo_incl_tcu
+  J: judiciario
+  M: mpu
+rgf_pessoal:
+  - {indicador: "dtp_{poder}_bi",        anexo: "RGF-Anexo 01", cod_conta: DespesaComPessoalTotal,             coluna: "^valor$", somar: true}
+  - {indicador: "limite_dtp_{poder}_bi", anexo: "RGF-Anexo 01", cod_conta: LimiteMaximoDespesaComPessoalTotal, coluna: "^valor$", somar: true}
+
 rreo:
-  - {indicador: receitas_operacoes_credito_bi, anexo: "RREO-Anexo 09", conta: "RECEITAS DE OPERA[CÇ][OÕ]ES DE CR[EÉ]DITO", coluna: "RECEITAS REALIZADAS"}
-  - {indicador: despesas_capital_bi,           anexo: "RREO-Anexo 09", conta: "DESPESA DE CAPITAL",                         coluna: "DESPESAS (EMPENHADAS|LIQUIDADAS)"}
-  - {indicador: mde_bi,                        anexo: "RREO-Anexo 08", conta: "APLICADO EM MDE",                            coluna: "Valor"}
-  - {indicador: receita_liquida_impostos_bi,   anexo: "RREO-Anexo 08", conta: "RECEITA L[IÍ]QUIDA DE IMPOSTOS",             coluna: "Valor"}
-  - {indicador: asps_bi,                       anexo: "RREO-Anexo 12", conta: "DESPESAS? COM A[CÇ][OÕ]ES E SERVI[CÇ]OS P[UÚ]BLICOS DE SA[UÚ]DE", coluna: "LIQUIDADAS"}
+  - {indicador: receitas_operacoes_credito_bi, anexo: "RREO-Anexo 09", cod_conta: ReceitasDeOperacoesDeCreditoRegraDeOuro, coluna: "^receitas realizadas$"}
+  - {indicador: despesas_capital_bi,           anexo: "RREO-Anexo 09", cod_conta: DespesaDeCapitalLiquida,                 coluna: "^despesas empenhadas$"}
+  # Saúde e educação: a União não publica os Anexos 8 e 12 no SICONFI; os valores estão no
+  # Anexo 14 (demonstrativo simplificado). Atenção aos rótulos das colunas (2025):
+  #   "Valor Apurado Até o Bimestre"      → valor aplicado (R$)
+  #   "% Mínimo a Aplicar no Exercício"   → valor MÍNIMO em R$ (apesar do "%")
+  #   "% Aplicado Até o Bimestre"         → aplicado ÷ mínimo × 100 (não é % da base)
+  - {indicador: asps_bi,         anexo: "RREO-Anexo 14", cod_conta: AplicacaoTotalDasDespesasComAcoesEServicosPublicosDeSaude, coluna: "^valor apurado at[eé] o bimestre$"}
+  - {indicador: asps_minimo_bi,  anexo: "RREO-Anexo 14", cod_conta: AplicacaoTotalDasDespesasComAcoesEServicosPublicosDeSaude, coluna: "^% m[ií]nimo a aplicar no exerc[ií]cio$"}
+  - {indicador: mde_bi,          anexo: "RREO-Anexo 14", cod_conta: MinimoAnualDasReceitasDeImpostosNaManutencaoEDesenvolvimentoDoEnsinoDemonstrativoSimplificado, coluna: "^valor apurado at[eé] o bimestre$"}
+  - {indicador: mde_minimo_bi,   anexo: "RREO-Anexo 14", cod_conta: MinimoAnualDasReceitasDeImpostosNaManutencaoEDesenvolvimentoDoEnsinoDemonstrativoSimplificado, coluna: "^% m[ií]nimo a aplicar no exerc[ií]cio$"}
+  # Primário acima da linha (OFSS, referência para a discrepância com o BCB)
+  - {indicador: primario_gc_acima_linha_bi, anexo: "RREO-Anexo 14", cod_conta: ResultadoPrimarioDemonstrativoSimplificado, coluna: "^at[eé] o bimestre$"}

@@ -142,9 +142,11 @@ def test_pessoal_r09_r10_r11(params, base):
 
 
 def test_limite_a_confirmar_vira_pendente(params, base):
-    b = base(2026, obs("rcl_bi", 1000), obs("operacoes_credito_rgf_bi", 600), obs("dcl_bi", 6000))
+    b = base(2026, obs("contingenciamento_bi", 10, "2026-12-31", "projecao"),
+             obs("despesas_discricionarias_bi", 200, "2026-12-31", "projecao"),
+             obs("rcl_bi", 1000), obs("dcl_bi", 6000))
     res = por_id(params, 2026, b)
-    assert res["R13"].status == st.PENDENTE            # limite null + verificar
+    assert res["R07"].status == st.PENDENTE            # limite null + verificar
     assert res["R14"].status == st.MONITORAMENTO       # sem limite legal
 
 
@@ -170,3 +172,24 @@ def test_exemplo_ilustrativo_apura_tudo(params):
     res = apurar(params, 2026, b)
     assert len(res) == 17
     assert all(r.status != st.SEM_DADOS for r in res)
+
+
+def test_r09_soma_os_poderes_quando_falta_total(params, base):
+    b = base(2026, obs("rcl_bi", 1000), obs("dtp_executivo_bi", 300),
+             obs("dtp_legislativo_incl_tcu_bi", 12), obs("dtp_judiciario_bi", 50), obs("dtp_mpu_bi", 7))
+    r = por_id(params, 2026, b)["R09"]
+    assert r.valor == pytest.approx(0.369)
+    b2 = base(2026, obs("rcl_bi", 1000), obs("dtp_executivo_bi", 300))   # Poder faltando: não soma
+    assert por_id(params, 2026, b2)["R09"].status == st.SEM_DADOS
+
+
+def test_minimos_com_valor_minimo_publicado(params, base):
+    # RREO Anexo 14 da União, 2025: saúde 234,55 aplicado vs. 227,66 mínimo; MDE 129,89 vs. 122,10
+    b = base(2026, obs("asps_bi", 234.55, "2026-12-31"), obs("asps_minimo_bi", 227.66, "2026-12-31"),
+             obs("mde_bi", 110.0), obs("mde_minimo_bi", 122.10))
+    res = por_id(params, 2026, b)
+    assert res["R16"].status == st.CUMPRE
+    assert res["R16"].valor == pytest.approx(0.15 * 234.55 / 227.66)      # 15,45% da RCL
+    assert res["R16"].extras["uso_do_minimo"] == pytest.approx(1.0303, abs=1e-4)
+    assert res["R17"].status == st.DESCUMPRE
+    assert any("até o bimestre" in n for n in res["R17"].notas)

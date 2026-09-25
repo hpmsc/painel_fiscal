@@ -1,6 +1,6 @@
 name: Coleta
 
-# Coleta semanal das fontes com API (BCB SGS e SICONFI) e grava as observações em
+# Coleta semanal das fontes com API (BCB SGS, SICONFI e SIOP) e grava as observações em
 # dados/tratados/<exercício>.json, com commit na main. Ao terminar, o workflow "Painel"
 # roda (gatilho workflow_run) e republica a página com os dados novos.
 on:
@@ -39,11 +39,20 @@ jobs:
         run: python -m painel_fiscal coletar-siconfi --exercicio "$EXERCICIO" --demonstrativo rgf --periodo 1 2 3
       - name: SICONFI RREO (bimestres publicados)
         run: python -m painel_fiscal coletar-siconfi --exercicio "$EXERCICIO" --demonstrativo rreo --periodo 1 2 3 4 5 6
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Instalar orcamentoBR
+        run: Rscript -e 'install.packages("orcamentoBR")'
+      - name: SIOP (dotação e execução por RP x GND)
+        run: |
+          Rscript scripts/coleta_siop.R "$EXERCICIO"
+          python -m painel_fiscal coletar-siop --exercicio "$EXERCICIO"
       - name: Testes
         run: python -m pytest -q
       - name: Gravar dados coletados
         run: |
-          git add dados/tratados/
+          git add dados/tratados/ dados/siop/
           if git diff --cached --quiet; then
             echo "Nenhuma observação nova."
             exit 0

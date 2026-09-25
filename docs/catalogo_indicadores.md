@@ -17,9 +17,11 @@ dívida em **% do PIB** (ex.: 79,2). `tipo`: `realizado` (BCB, RTN, SICONFI) ou
 | `limite_despesa_anterior_bi`, `ipca_12m_jun` | R02 (cálculo alternativo) | realizado | LOA anterior; IBGE | Usados só se `limite_despesa_bi` faltar |
 | `variacao_real_receita_primaria_12m_jun` | R03 | realizado | STN RTN + IPCA | 12 meses até junho do ano anterior |
 | `meta_ano_anterior_cumprida` | R03 | realizado | apuração do ano anterior | booleano |
-| `investimentos_loa_bi`, `pib_estimado_ploa_bi` | R05 | projecao | LOA/SIOP; PLOA | |
+| `investimentos_loa_bi` | R05 | projecao | SIOP (orcamentoBR) | GND 4 das despesas primárias (RP em `fontes.siop.rp_primarias`), dotação da LOA |
+| `pib_estimado_ploa_bi` | R05 | projecao | PLOA (carga manual) | |
 | `fator_ipca_desde_jan2023` | R06 | realizado | IBGE | Fator acumulado (ex.: 1,17) |
-| `contingenciamento_bi`, `despesas_discricionarias_bi` | R07 | projecao | Relatório Bimestral; decretos | |
+| `contingenciamento_bi` | R07 | projecao | Relatório Bimestral; decretos (carga manual) | Não está no SIOP |
+| `despesas_discricionarias_bi` | R07 | projecao | SIOP (orcamentoBR) | RP em `fontes.siop.rp_discricionarias`, dotação atualizada |
 | `receitas_operacoes_credito_bi`, `despesas_capital_bi` | R08 | realizado | RREO Anexo 9 | |
 | `creditos_maioria_absoluta_bi` | R08 (ressalva) | realizado | Leis de crédito | Créditos suplementares/especiais aprovados por maioria absoluta |
 | `rcl_bi` | R09–R14, R16 | realizado | RGF Anexo 1 | |

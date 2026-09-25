@@ -108,6 +108,19 @@ def cmd_coletar_siconfi(args) -> int:
     return 0
 
 
+def cmd_coletar_siop(args) -> int:
+    from .coletores import siop
+    p = config.carregar(args.config)
+    arq = Path(args.arquivo or RAIZ / "dados" / "siop" / f"siop_rp_gnd_{args.exercicio}.csv")
+    if not arq.exists():
+        print(f"! {arq} não existe; rode antes: Rscript scripts/coleta_siop.R {args.exercicio}",
+              file=sys.stderr)
+        return 1
+    novas = siop.converter(siop.ler_csv(arq), args.exercicio, p.fontes.get("siop", {}), dt.date.today())
+    print(f"→ {_acrescentar_tratados(args.exercicio, novas)}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="painel_fiscal", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -133,6 +146,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--periodo", type=int, nargs="+", required=True,
                    help="um ou mais períodos (RGF 1–3, RREO 1–6); período ainda não publicado vem vazio")
     s.set_defaults(fn=cmd_coletar_siconfi)
+
+    s = sub.add_parser("coletar-siop", help="lê o CSV gerado por scripts/coleta_siop.R")
+    s.add_argument("--exercicio", type=int, required=True)
+    s.add_argument("--arquivo")
+    s.set_defaults(fn=cmd_coletar_siop)
 
     args = ap.parse_args(argv)
     return args.fn(args)

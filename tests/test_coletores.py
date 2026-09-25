@@ -105,3 +105,21 @@ def test_siconfi_filtra_cod_conta_periodo_e_instituicao():
                                                           dt.date.today(), "x", periodo=3)}
     assert obs == {"dcl_bi": pytest.approx(2000), "dtp_legislativo_incl_tcu_bi": pytest.approx(9),
                    "dtp_senado_bi": pytest.approx(5)}
+
+
+def test_siop_investimentos_e_discricionarias(tmp_path):
+    from painel_fiscal.coletores import siop
+    csv_ = tmp_path / "siop_rp_gnd_2025.csv"
+    csv_.write_text(
+        '"exercicio";"rp_cod";"rp_desc";"gnd_cod";"gnd_desc";"ploa";"loa";"loa_mais_credito";"empenhado";"liquidado";"pago"\n'
+        '2025;"1";"Obrigatória";"4";"Investimentos";0;10e9;11e9;9e9;0;0\n'
+        '2025;"2";"Discricionária";"4";"Investimentos";0;50e9;55e9;40e9;0;0\n'
+        '2025;"2";"Discricionária";"3";"Outras Despesas Correntes";0;100e9;120e9;90e9;0;0\n'
+        '2025;"0";"Financeira";"4";"Investimentos";0;7e9;7e9;7e9;0;0\n'
+        '2025;"6";"Emendas individuais";"4";"Investimentos";0;5e9;5e9;1e9;0;0\n', encoding="utf-8")
+    cfg = {"rp_primarias": [1, 2, 3, 6, 7, 8, 9], "rp_discricionarias": [2, 3, 6, 7, 8, 9]}
+    obs = {o.indicador: o for o in siop.converter(siop.ler_csv(csv_), 2025, cfg, dt.date.today())}
+    assert obs["investimentos_loa_bi"].valor == pytest.approx(65)          # 10+50+5, sem RP 0
+    assert obs["despesas_discricionarias_bi"].valor == pytest.approx(180)  # 55+120+5
+    assert obs["despesas_discricionarias_bi"].tipo == "projecao"
+    assert obs["despesas_discricionarias_empenhadas_bi"].valor == pytest.approx(131)

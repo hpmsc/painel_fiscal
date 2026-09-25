@@ -45,7 +45,8 @@ Para ativar: *Settings → Pages → Build and deployment → Source: GitHub Act
 
 O workflow `.github/workflows/coleta.yml` roda toda segunda-feira (e sob demanda em
 *Actions → Coleta → Run workflow*). Coleta o BCB (primário do Governo Central, DBGG, DLSP)
-e o SICONFI (RGF e RREO da União, todos os períodos já publicados), grava as observações
+o SICONFI (RGF e RREO da União, todos os períodos já publicados) e o SIOP (dados abertos
+do orçamento, pelo pacote R `orcamentoBR`, sem credencial), grava as observações
 novas em `dados/tratados/<ano>.json` com commit na `main` e, ao terminar, dispara o
 workflow Painel, que republica a página. Coletas repetidas não duplicam dados; valores
 revisados pela fonte ficam registrados como nova observação.

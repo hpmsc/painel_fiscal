@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regras Fiscais da União {{ exercicio }}</title>
+<style>
+:root {
+  color-scheme: light;
+  --plano: #f9f9f7; --superficie: #fcfcfb; --tinta: #0b0b0b; --tinta-2: #52514e; --tinta-3: #6e6c67;
+  --grade: #e1e0d9; --base: #c3c2b7; --borda: rgba(11,11,11,0.10);
+  --serie-1: #2a78d6; --serie-2: #eb6834; --banda: #cde2fb;
+  --bom: #0ca30c; --atencao: #fab219; --serio: #ec835a; --critico: #d03b3b; --neutro: #898781;
+  --aviso-fundo: #fff4d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --plano: #0d0d0d; --superficie: #1a1a19; --tinta: #ffffff; --tinta-2: #c3c2b7; --tinta-3: #a3a198;
+    --grade: #2c2c2a; --base: #383835; --borda: rgba(255,255,255,0.10);
+    --serie-1: #3987e5; --serie-2: #d95926; --banda: #22364f; --aviso-fundo: #3a2f10;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plano: #0d0d0d; --superficie: #1a1a19; --tinta: #ffffff; --tinta-2: #c3c2b7; --tinta-3: #a3a198;
+  --grade: #2c2c2a; --base: #383835; --borda: rgba(255,255,255,0.10);
+  --serie-1: #3987e5; --serie-2: #d95926; --banda: #22364f; --aviso-fundo: #3a2f10;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--plano); color: var(--tinta);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 48px; }
+header h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+header p { margin: 0; color: var(--tinta-2); }
+.aviso { background: var(--aviso-fundo); border: 1px solid var(--atencao); border-radius: 8px;
+  padding: 10px 14px; margin: 16px 0; font-weight: 600; }
+.cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: 12px;
+  padding: 18px 20px; margin-top: 18px; }
+.cartao h2 { font-size: 1.05rem; margin: 0 0 4px; }
+.cartao .sub { color: var(--tinta-2); margin: 0 0 12px; font-size: 0.9rem; }
+.resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 18px; }
+.tile { background: var(--superficie); border: 1px solid var(--borda); border-radius: 12px; padding: 14px 16px; }
+.tile .n { font-size: 2rem; font-weight: 650; line-height: 1.1; }
+.tile .l { color: var(--tinta-2); font-size: 0.88rem; display: flex; gap: 6px; align-items: center; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 0 18px; }
+.tabela-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th { text-align: left; font-weight: 600; color: var(--tinta-2); border-bottom: 1px solid var(--base); padding: 8px 10px; white-space: nowrap; }
+td { border-bottom: 1px solid var(--grade); padding: 9px 10px; vertical-align: top; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+th.num { text-align: right; }
+td .id { color: var(--tinta-3); font-variant-numeric: tabular-nums; }
+td .legal { color: var(--tinta-3); font-size: 0.8rem; display: block; }
+.nota { color: var(--tinta-2); font-size: 0.8rem; display: block; margin-top: 2px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 8px; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600; white-space: nowrap; border: 1px solid var(--borda); background: var(--superficie); }
+.chip .pt, .tile .pt { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.tom-bom .pt, .pt.tom-bom { background: var(--bom); }
+.tom-atencao .pt, .pt.tom-atencao { background: var(--atencao); }
+.tom-serio .pt, .pt.tom-serio { background: var(--serio); }
+.tom-critico .pt, .pt.tom-critico { background: var(--critico); }
+.tom-neutro .pt, .pt.tom-neutro { background: var(--neutro); }
+.tag { font-size: 0.72rem; font-weight: 600; border: 1px solid var(--atencao); border-radius: 4px; padding: 0 5px; margin-left: 4px; white-space: nowrap; }
+.base-ap { font-size: 0.72rem; color: var(--tinta-3); display: block; }
+svg.grafico { width: 100%; height: auto; display: block; overflow: visible; }
+svg .grade { stroke: var(--grade); stroke-width: 1; }
+svg .base, svg .zero { stroke: var(--base); stroke-width: 1; }
+svg .eixo { fill: var(--tinta-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+svg .rotulo { fill: var(--tinta); font-size: 12px; }
+svg .rotulo-sec { fill: var(--tinta-2); font-size: 11px; }
+svg .valor { fill: var(--tinta); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+svg .banda { fill: var(--banda); }
+svg .centro { stroke: var(--tinta-2); stroke-width: 2; }
+svg .marca { stroke: var(--superficie); stroke-width: 2; }
+svg .barra { fill: var(--serie-1); }
+svg .ref { stroke-width: 1.5; }
+svg .ref-alerta { stroke: var(--atencao); }
+svg .ref-prudencial { stroke: var(--serio); }
+svg .ref-limite { stroke: var(--critico); }
+svg .linha { fill: none; stroke-width: 2; stroke-linejoin: round; }
+svg .linha.projecao { stroke-dasharray: 5 4; }
+svg .chip-svg { fill: var(--superficie); stroke: var(--borda); }
+svg .chip-svg-txt { fill: var(--tinta); font-size: 11px; font-weight: 600; }
+svg .alvo:hover .barra, svg .alvo:hover .marca { opacity: 0.8; }
+.legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: 0.85rem; color: var(--tinta-2); }
+.leg-item { display: inline-flex; align-items: center; gap: 6px; }
+.leg-marca { width: 11px; height: 11px; display: inline-block; }
+.leg-marca.circ { border-radius: 50%; }
+.leg-marca.quad { border-radius: 2px; }
+.leg-marca.banda-leg { background: var(--banda); border-radius: 2px; width: 18px; }
+.leg-linha { width: 18px; border-top: 2px solid; display: inline-block; }
+.leg-linha.tracejada { border-top-style: dashed; }
+.ded td { font-size: 0.85rem; }
+.vazio { color: var(--tinta-2); font-style: italic; }
+ul.pend { margin: 0; padding-left: 0; list-style: none; }
+ul.pend li { padding: 7px 0; border-bottom: 1px solid var(--grade); font-size: 0.9rem; }
+ul.pend .t { font-weight: 600; margin-right: 6px; }
+footer { color: var(--tinta-2); font-size: 0.82rem; margin-top: 24px; }
+details summary { cursor: pointer; color: var(--tinta-2); font-size: 0.85rem; margin-top: 10px; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Regras fiscais da União — exercício {{ exercicio }}</h1>
+  <p>{{ escopo }} · Parâmetros: {{ fonte_legal }} · Posição normativa {{ data_normativa }} · Gerado em {{ gerado_em }}</p>
+</header>
+
+{% if ilustrativo %}
+<div class="aviso" role="alert">⚠ DADOS ILUSTRATIVOS — valores fictícios para demonstrar o painel. Não usar para análise.</div>
+{% endif %}
+
+<section class="resumo" aria-label="Resumo do semáforo">
+  {% for tom, rotulo, n in resumo %}
+  <div class="tile"><div class="n">{{ n }}</div><div class="l tom-{{ tom }}"><span class="pt"></span>{{ icone[tom] }} {{ rotulo }}</div></div>
+  {% endfor %}
+</section>
+
+<section class="cartao">
+  <h2>Semáforo das regras</h2>
+  <p class="sub">Valor apurado, limite ou meta, folga (positiva = espaço; negativa = excesso), status, fonte e data de referência.</p>
+  <div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Regra</th><th class="num">Apurado</th><th class="num">Limite / meta</th><th class="num">Folga</th><th>Status</th><th>Fonte · referência</th></tr></thead>
+    <tbody>
+    {% for x in resultados %}
+    <tr>
+      <td><span class="id">{{ x.id }}</span> {{ x.nome }}{% if x.verificar %}<span class="tag" title="Confirmar na fonte primária">⚠ verificar</span>{% endif %}
+        <span class="legal">{{ x.base_legal | join("; ") }} · {{ x.frequencia }}</span>
+        {% for n in x.notas %}<span class="nota">{{ n }}</span>{% endfor %}</td>
+      <td class="num">{{ x.valor | fmt(x.unidade) }}{% if x.base_apuracao and x.base_apuracao != "realizado" %}<span class="base-ap">{{ x.base_apuracao }}</span>{% endif %}</td>
+      <td class="num">{{ x | limite }}</td>
+      <td class="num">{{ x | folga }}</td>
+      <td><span class="chip tom-{{ x.tom }}"><span class="pt"></span>{{ icone[x.tom] }} {{ x.rotulo_status }}</span></td>
+      <td><span class="legal" style="font-size:.8rem">{{ x.fontes | join(", ") }}</span><span class="legal">ref. {{ x.data_referencia | data }}{% if x.data_coleta %} · coleta {{ x.data_coleta | data }}{% endif %}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<div class="grid2">
+<section class="cartao">
+  <h2>R01 · Meta de resultado primário</h2>
+  {% set m = r["R01"] %}
+  <p class="sub">Critério oficial: abaixo da linha (BCB). Resultado ajustado = primário + despesas deduzidas da meta.</p>
+  {% if graficos.meta %}{{ graficos.meta }}{% else %}<p class="vazio">Sem banda de meta no YAML.</p>{% endif %}
+  {% if m.extras.deducoes %}
+  <details open><summary>Deduções aplicadas ({{ m.extras.total_deducoes | fmt("R$ bi") }})</summary>
+    <table class="ded"><tbody>
+    {% for d in m.extras.deducoes %}<tr><td>{{ d.item }}<span class="legal">{{ d.base_legal or "" }} · {{ d.fonte }}</span></td><td class="num">{{ d.deduzido_bi | fmt("R$ bi") }}</td></tr>{% endfor %}
+    </tbody></table>
+  </details>
+  {% endif %}
+  {% if m.extras.get("acima_linha") is not none %}
+  <p class="sub" style="margin-top:10px">Referência acima da linha (RTN): {{ m.extras.acima_linha | fmt("R$ bi") }}{% if m.extras.discrepancia_estatistica is defined %} · discrepância estatística {{ m.extras.discrepancia_estatistica | fmt("R$ bi") }}{% endif %}.</p>
+  {% endif %}
+</section>
+
+<section class="cartao">
+  <h2>R02 · Limite de despesas primárias por Poder</h2>
+  <p class="sub">Despesa sujeita ao limite (projeção do Relatório Bimestral) ÷ limite do Regime Fiscal Sustentável.</p>
+  {% if graficos.despesa %}{{ graficos.despesa }}{% else %}<p class="vazio">Sem dados por Poder.</p>{% endif %}
+</section>
+
+<section class="cartao">
+  <h2>R09–R11 · Despesa com pessoal vs. limites da LRF</h2>
+  <p class="sub">Uso do limite de cada Poder (1 = 100%); linhas em alerta (90%), prudencial (95%) e limite.</p>
+  {% if graficos.pessoal %}{{ graficos.pessoal }}{% else %}<p class="vazio">Sem dados do RGF Anexo 1.</p>{% endif %}
+</section>
+
+<section class="cartao">
+  <h2>R15 · Trajetória da dívida (% do PIB)</h2>
+  <p class="sub">DBGG e DLSP (BCB) vs. projeção do Anexo de Metas Fiscais da LDO. Sem limite legal: monitoramento.</p>
+  {% if graficos.divida %}{{ graficos.divida }}{% else %}<p class="vazio">Sem séries de dívida.</p>{% endif %}
+</section>
+</div>
+
+<section class="cartao">
+  <h2>Controvérsias e pendências</h2>
+  <p class="sub">Itens que o painel não trata como certos até a confirmação na fonte primária.</p>
+  <ul class="pend">
+    {% for p in pendencias %}<li><span class="t">{{ p.tipo }} · {{ p.regra }}</span>{{ p.texto }}</li>{% endfor %}
+  </ul>
+</section>
+
+<footer>
+  Status: cumpre/descumpre para metas e mínimos; em regras com teto, OK &lt; 90% do limite, alerta ≥ 90%, prudencial ≥ 95%, excedido ≥ 100%.
+  R14 e R15 não têm limite legal vigente e aparecem só para monitoramento. Valores em R$ correntes.
+</footer>
+</main>
+</body>
+</html>

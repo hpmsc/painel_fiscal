@@ -1,0 +1,79 @@
+import datetime as dt
+
+import pytest
+
+from painel_fiscal.coletores import bcb_sgs, ibge_sidra, siconfi
+
+
+def test_bcb_converte_formato_sgs():
+    itens = [{"data": "01/07/2026", "valor": "78.95"}, {"data": "01/08/2026", "valor": "79,20"},
+             {"data": "01/09/2026", "valor": ""}]
+    obs = bcb_sgs.converter("dbgg_pct_pib", itens, 13762, dt.date(2026, 9, 25))
+    assert [o.data_referencia for o in obs] == [dt.date(2026, 7, 31), dt.date(2026, 8, 31)]
+    assert obs[1].valor == pytest.approx(79.2)
+    assert obs[0].fonte == "bcb_sgs:13762"
+
+
+def test_bcb_inverte_sinal_nfsp():
+    obs = bcb_sgs.converter("primario_gc_abaixo_linha_bi", [{"data": "01/12/2025", "valor": "12.5"}],
+                            1, dt.date.today(), fator=-1)
+    assert obs[0].valor == -12.5
+
+
+class SessaoFalsa:
+    def __init__(self, paginas):
+        self.paginas, self.chamadas = paginas, []
+
+    def get(self, url, params=None, timeout=None, headers=None):
+        self.chamadas.append(params)
+        pagina = self.paginas[len(self.chamadas) - 1]
+
+        class R:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return pagina
+        return R()
+
+
+def test_siconfi_pagina_ate_hasmore_false():
+    s = SessaoFalsa([{"items": [{"a": 1}] * 2, "hasMore": True, "limit": 2},
+                     {"items": [{"a": 2}], "hasMore": False, "limit": 2}])
+    itens = siconfi.buscar_itens("rgf", {"an_exercicio": 2025}, s)
+    assert len(itens) == 3
+    assert [c["offset"] for c in s.chamadas] == [0, 2]
+
+
+ITENS_RGF = [
+    {"anexo": "RGF-Anexo 01", "conta": "RECEITA CORRENTE LÍQUIDA - RCL", "coluna": "VALOR", "valor": 1.48e12},
+    {"anexo": "RGF-Anexo 01", "conta": "DESPESA TOTAL COM PESSOAL - DTP", "coluna": "VALOR", "valor": 4.4e11},
+    {"anexo": "RGF-Anexo 01", "conta": "DESPESA TOTAL COM PESSOAL - DTP", "coluna": "% SOBRE A RCL", "valor": 29.7},
+]
+
+
+def test_siconfi_extrai_por_mapeamento():
+    mapa = [{"indicador": "rcl_bi", "anexo": "RGF-Anexo 01", "conta": "RECEITA CORRENTE L[IÍ]QUIDA", "coluna": "^VALOR"},
+            {"indicador": "dtp_total_bi", "anexo": "RGF-Anexo 01", "conta": "DESPESA TOTAL COM PESSOAL", "coluna": "^VALOR"}]
+    obs = {o.indicador: o for o in siconfi.extrair(ITENS_RGF, mapa, dt.date(2026, 8, 31), dt.date.today(), "x")}
+    assert obs["rcl_bi"].valor == pytest.approx(1480)
+    assert obs["dtp_total_bi"].valor == pytest.approx(440)
+
+
+def test_siconfi_mapeamento_ambiguo_falha():
+    mapa = [{"indicador": "dtp_total_bi", "conta": "DESPESA TOTAL COM PESSOAL"}]
+    with pytest.raises(ValueError, match="2 linhas"):
+        siconfi.extrair(ITENS_RGF, mapa, dt.date(2026, 8, 31), dt.date.today(), "x")
+
+
+def test_siconfi_fim_de_periodo():
+    assert siconfi.data_fim_periodo("rgf", 2026, 2) == dt.date(2026, 8, 31)
+    assert siconfi.data_fim_periodo("rreo", 2026, 1) == dt.date(2026, 2, 28)
+
+
+def test_sidra_converte():
+    linhas = [{"V": "Valor", "D3C": "Mês (Código)"}, {"V": "0.24", "D3C": "202606"},
+              {"V": "...", "D3C": "202607"}]
+    obs = ibge_sidra.converter("ipca_mensal", linhas, 1737, dt.date.today(), escala=0.01)
+    assert len(obs) == 1 and obs[0].data_referencia == dt.date(2026, 6, 30)
+    assert obs[0].valor == pytest.approx(0.0024)

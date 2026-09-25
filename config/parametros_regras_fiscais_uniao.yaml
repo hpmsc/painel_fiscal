@@ -1,0 +1,253 @@
+# Parâmetros das regras fiscais da União
+# Posição normativa: setembro/2026. "verificar: true" = confirmar na fonte primária antes de produção.
+# Valores por exercício ficam em `exercicios`; o código não deve fixar metas ou deduções.
+
+metadados:
+  escopo: "União — Governo Central (Orçamentos Fiscal e da Seguridade Social)"
+  data_referencia: "2026-09-25"
+  moeda: "BRL"
+
+status_percentual:          # usado nas regras com limite em % da RCL
+  alerta: 0.90              # LRF art. 59, §1º, II
+  prudencial: 0.95          # LRF art. 22, parágrafo único
+  excedido: 1.00
+
+regras:
+  - id: R01
+    nome: "Meta de resultado primário"
+    base_legal: ["LRF art. 4º §1º", "LC 200/2023 art. 2º", "LDO do exercício"]
+    indicador: "primario_governo_central_abaixo_linha + despesas_deduzidas_da_meta"   # deduções são despesas excluídas do cômputo: somam ao resultado
+    limite: "exercicios[ano].meta_primaria (centro ± banda)"
+    fonte: [bcb_sgs, stn_rtn]
+    frequencia: mensal
+    status: meta_banda
+
+  - id: R02
+    nome: "Limite de despesas primárias (Regime Fiscal Sustentável)"
+    base_legal: ["LC 200/2023 arts. 3º a 5º", "EC 136/2025", "LC 223/2025"]
+    indicador: "despesa_primaria_sujeita_limite / limite_despesa (por Poder/órgão)"
+    limite: "limite_ano_anterior * (1 + ipca_12m_jun) * (1 + crescimento_real)"
+    fonte: [relatorio_bimestral, stn_rtn, loa]
+    frequencia: bimestral
+    status: percentual
+
+  - id: R03
+    nome: "Crescimento real do limite de despesas"
+    base_legal: ["LC 200/2023 art. 5º"]
+    indicador: "fator * variacao_real_receita_primaria_12m_jun_ano_anterior"
+    parametros:
+      fator_meta_cumprida: 0.70
+      fator_meta_descumprida: 0.50
+      piso_real: 0.006
+      teto_real: 0.025
+    fonte: [stn_rtn, ibge_sidra]
+    frequencia: anual
+
+  - id: R04
+    nome: "Gatilhos por déficit / descumprimento"
+    base_legal: ["LC 200/2023 art. 6º-A", "LDO/PLDO"]
+    indicador: "booleano por vedação"
+    limite: "exercicios[ano].gatilhos"
+    fonte: [ldo, stn_rtn]
+    frequencia: anual
+    status: booleano
+
+  - id: R05
+    nome: "Piso de investimentos"
+    base_legal: ["LC 200/2023 art. 10"]
+    indicador: "investimentos_loa / pib_estimado_ploa"
+    limite: 0.006
+    tipo_limite: minimo
+    fonte: [loa, siop]
+    frequencia: anual
+    verificar: true
+
+  - id: R06
+    nome: "Uso do excesso de primário em investimentos"
+    base_legal: ["LC 200/2023 (verificar dispositivo vigente)"]
+    indicador: "max(0, resultado_ajustado - teto_banda)"
+    parametros:
+      limite_nominal_base_bi: 25.0
+      correcao: "IPCA jan/2023 até o ano da LOA"
+      vigencia: [2025, 2028]
+    fonte: [stn_rtn, loa]
+    frequencia: anual
+    verificar: true
+
+  - id: R07
+    nome: "Limitação de empenho (contingenciamento)"
+    base_legal: ["LRF art. 9º", "LC 200/2023"]
+    indicador: "contingenciamento / despesas_discricionarias"
+    limite: null            # teto de contingenciamento: verificar na LC 200
+    fonte: [relatorio_bimestral, decretos_programacao]
+    frequencia: bimestral
+    verificar: true
+
+  - id: R08
+    nome: "Regra de ouro"
+    base_legal: ["CF art. 167, III", "LRF art. 12 §2º"]
+    indicador: "receitas_operacoes_credito - despesas_capital"
+    limite: 0               # deve ser <= 0, salvo créditos aprovados por maioria absoluta
+    tipo_limite: maximo
+    fonte: [siconfi_rreo_anexo_09, stn_rtn]
+    frequencia: bimestral
+
+  - id: R09
+    nome: "Despesa com pessoal — total da União"
+    base_legal: ["LRF arts. 19, I, e 20, I"]
+    indicador: "despesa_total_pessoal / rcl"
+    limite: 0.50
+    fonte: [siconfi_rgf_anexo_01]
+    frequencia: quadrimestral
+    status: percentual
+
+  - id: R10
+    nome: "Despesa com pessoal — por Poder"
+    base_legal: ["LRF art. 20, I"]
+    indicador: "dtp_poder / rcl"
+    limites:
+      executivo: 0.409
+      legislativo_incl_tcu: 0.025
+      judiciario: 0.06
+      mpu: 0.006
+    fonte: [siconfi_rgf_anexo_01]
+    frequencia: quadrimestral
+    status: percentual
+
+  - id: R11
+    nome: "Níveis de alerta e prudencial (pessoal)"
+    base_legal: ["LRF art. 59, §1º, II", "LRF art. 22, parágrafo único"]
+    indicador: "pior status entre R09 e R10 (derivado)"
+    limite: "status_percentual"
+    fonte: [siconfi_rgf_anexo_01]
+    frequencia: quadrimestral
+    status: derivado
+
+  - id: R12
+    nome: "Garantias concedidas pela União"
+    base_legal: ["Res. Senado 48/2007"]
+    indicador: "saldo_garantias / rcl"
+    limite: 0.60            # referência usual — verificar
+    fonte: [siconfi_rgf_anexo_03]
+    frequencia: quadrimestral
+    status: percentual
+    verificar: true
+
+  - id: R13
+    nome: "Operações de crédito da União"
+    base_legal: ["Res. Senado 48/2007"]
+    indicador: "operacoes_credito / rcl"
+    limite: null            # verificar
+    fonte: [siconfi_rgf_anexo_04]
+    frequencia: quadrimestral
+    verificar: true
+
+  - id: R14
+    nome: "Dívida consolidada líquida da União"
+    base_legal: ["LRF art. 30 (limite da União não aprovado pelo Senado)"]
+    indicador: "dcl / rcl"
+    limite: null
+    fonte: [siconfi_rgf_anexo_02]
+    frequencia: quadrimestral
+    status: monitoramento
+
+  - id: R15
+    nome: "Trajetória da dívida"
+    base_legal: ["LC 200/2023 art. 1º", "LDO — Anexo de Metas Fiscais"]
+    indicador: ["dbgg_pct_pib", "dlsp_pct_pib"]
+    limite: "exercicios[ano].trajetoria_divida_ldo"
+    fonte: [bcb_sgs]
+    frequencia: mensal
+    status: monitoramento
+
+  - id: R16
+    nome: "Mínimo em saúde (ASPS)"
+    base_legal: ["CF art. 198 §2º, I (EC 86/2015)"]
+    indicador: "asps / rcl"
+    limite: 0.15
+    tipo_limite: minimo
+    fonte: [siconfi_rreo_anexo_12]
+    frequencia: bimestral
+
+  - id: R17
+    nome: "Mínimo em educação (MDE)"
+    base_legal: ["CF art. 212"]
+    indicador: "mde / receita_liquida_impostos"
+    limite: 0.18
+    tipo_limite: minimo
+    fonte: [siconfi_rreo_anexo_08]
+    frequencia: bimestral
+
+exercicios:
+  2026:
+    fonte_legal: "LDO 2026 (sancionada)"
+    meta_primaria:
+      centro_bi: 34.3
+      centro_pct_pib: 0.0025
+      banda_pp_pib: 0.0025
+      limite_inferior_bi: 0.0
+      limite_superior_bi: 68.5
+      contingenciamento_mira_piso: true
+    deducoes:
+      - item: "Despesas temporárias com saúde e educação (Fundo Social)"
+        base_legal: "LC 223/2025"
+        indicador: despesas_fundo_social_bi   # valor vem dos dados (LOA/Relatório Bimestral)
+        valor_bi: null        # extrair da LOA/Relatório Bimestral
+      - item: "Precatórios"
+        base_legal: "EC 136/2025 (fora do limite de despesas)"
+        indicador: precatorios_bi
+        tratamento_meta: null # verificar — enquanto null, NÃO é deduzido da meta
+        verificar: true
+    gatilhos_art_6A:
+      status: controversia
+      nota: "TCU e consultorias: vigência já em 2026; governo: a partir de 2027"
+    crescimento_real_limite: null   # extrair do PLOA/LOA 2026
+    ipca_correcao: "IPCA 12m até jun/2025"
+
+  2027:
+    fonte_legal: "PLDO 2027 (em tramitação — atualizar após sanção)"
+    meta_primaria:
+      centro_bi: 73.2
+      centro_pct_pib: 0.0050
+      banda_pp_pib: 0.0025
+      banda_bi: 36.61
+    deducoes:
+      - item: "Precatórios e RPV — parcela computada na meta"
+        indicador: precatorios_bi
+        percentual_computado: 0.394   # deduz-se (1 - 0,394) da despesa
+      - item: "Despesas excepcionalizadas (compensação máxima)"
+        indicador: despesas_excepcionalizadas_bi
+        valor_max_bi: 65.66
+    gatilhos_art_6A:
+      status: ativo
+      exemplos: ["vedação de concessão, ampliação ou prorrogação de benefício tributário"]
+    crescimento_real_limite: null   # extrair do PLOA 2027
+    ipca_correcao: "IPCA 12m até jun/2026"
+    metas_indicativas:
+      2030: { centro_bi: 272.2, centro_pct_pib: 0.015 }
+
+fontes:
+  bcb_sgs:
+    url: "https://api.bcb.gov.br/dados/serie/bcdata.sgs.{codigo}/dados?formato=json&dataInicial={dd/mm/aaaa}"
+    series:
+      dbgg_pct_pib: 13762          # verificar
+      dlsp_pct_pib: 4513           # verificar
+      # dados de 2026 ainda sem série trajetória: a projeção da LDO entra como
+      # indicador trajetoria_ldo_dbgg_pct_pib (carga manual, Anexo de Metas Fiscais)
+      primario_governo_central: null  # identificar no catálogo SGS
+  stn_rtn:
+    url: "https://www.tesourotransparente.gov.br/ckan/api/3/action/package_search?q=resultado+do+tesouro+nacional"
+    formato: xlsx
+  siconfi:
+    rreo: "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/rreo"
+    rgf: "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/rgf"
+    parametros: [an_exercicio, nr_periodo, co_tipo_demonstrativo, no_anexo, id_ente, co_poder]
+    id_ente_uniao: 1               # verificar
+  ibge_sidra:
+    url: "https://apisidra.ibge.gov.br/values/t/{tabela}/..."
+    tabelas: { ipca: 1737, pib_corrente_trimestral: 1846 }   # verificar variáveis
+  relatorio_bimestral:
+    acesso: "PDF — gov.br/planejamento e gov.br/fazenda (sem API)"
+  siop:
+    acesso: "Painel do Orçamento (público); webservice exige credencial"
+  benchmarks: [ifi_raf, prisma_fiscal, focus_bcb]

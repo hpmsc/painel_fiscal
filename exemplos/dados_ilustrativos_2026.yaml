@@ -1,0 +1,65 @@
+# ⚠ DADOS ILUSTRATIVOS — valores FICTÍCIOS, só para demonstrar o painel e os testes.
+# Não representam números oficiais. O painel exibe um aviso quando este arquivo é usado.
+exercicio: 2026
+ilustrativo: true
+observacoes:
+  # R01 — primário do Governo Central (superávit positivo, R$ bi)
+  - {indicador: primario_gc_abaixo_linha_bi, valor: -45.0, data_referencia: 2026-08-31, fonte: bcb_sgs, tipo: realizado}
+  - {indicador: primario_gc_acima_linha_bi,  valor: -48.0, data_referencia: 2026-08-31, fonte: stn_rtn, tipo: realizado}
+  - {indicador: primario_gc_abaixo_linha_bi, valor: -8.0,  data_referencia: 2026-12-31, data_coleta: 2026-09-22, fonte: relatorio_bimestral_4b, tipo: projecao}
+  - {indicador: despesas_fundo_social_bi,    valor: 12.0,  data_referencia: 2026-12-31, data_coleta: 2026-09-22, fonte: relatorio_bimestral_4b, tipo: projecao}
+  # R02 — limite de despesas (projeção anual do relatório bimestral)
+  - {indicador: despesa_sujeita_limite_bi, valor: 2219.3, data_referencia: 2026-12-31, fonte: relatorio_bimestral_4b, tipo: projecao}
+  - {indicador: limite_despesa_bi,         valor: 2232.6, data_referencia: 2026-12-31, fonte: loa_2026, tipo: projecao}
+  - {indicador: despesa_sujeita_limite_executivo_bi,   valor: 2130.0, data_referencia: 2026-12-31, fonte: relatorio_bimestral_4b, tipo: projecao}
+  - {indicador: limite_despesa_executivo_bi,           valor: 2138.0, data_referencia: 2026-12-31, fonte: loa_2026, tipo: projecao}
+  - {indicador: despesa_sujeita_limite_legislativo_bi, valor: 18.0,   data_referencia: 2026-12-31, fonte: relatorio_bimestral_4b, tipo: projecao}
+  - {indicador: limite_despesa_legislativo_bi,         valor: 19.5,   data_referencia: 2026-12-31, fonte: loa_2026, tipo: projecao}
+  - {indicador: despesa_sujeita_limite_judiciario_bi,  valor: 60.0,   data_referencia: 2026-12-31, fonte: relatorio_bimestral_4b, tipo: projecao}
+  - {indicador: limite_despesa_judiciario_bi,          valor: 63.0,   data_referencia: 2026-12-31, fonte: loa_2026, tipo: projecao}
+  - {indicador: despesa_sujeita_limite_mpu_bi,         valor: 10.5,   data_referencia: 2026-12-31, fonte: relatorio_bimestral_4b, tipo: projecao}
+  - {indicador: limite_despesa_mpu_bi,                 valor: 11.2,   data_referencia: 2026-12-31, fonte: loa_2026, tipo: projecao}
+  - {indicador: despesa_sujeita_limite_dpu_bi,         valor: 0.8,    data_referencia: 2026-12-31, fonte: relatorio_bimestral_4b, tipo: projecao}
+  - {indicador: limite_despesa_dpu_bi,                 valor: 0.9,    data_referencia: 2026-12-31, fonte: loa_2026, tipo: projecao}
+  # R03
+  - {indicador: variacao_real_receita_primaria_12m_jun, valor: 0.035, data_referencia: 2025-06-30, fonte: stn_rtn}
+  - {indicador: meta_ano_anterior_cumprida,             valor: true,  data_referencia: 2025-12-31, fonte: bcb_sgs}
+  # R05 / R06 / R07
+  - {indicador: investimentos_loa_bi,     valor: 75.0,    data_referencia: 2026-12-31, fonte: loa_2026, tipo: projecao}
+  - {indicador: pib_estimado_ploa_bi,     valor: 13200.0, data_referencia: 2026-12-31, fonte: ploa_2026, tipo: projecao}
+  - {indicador: fator_ipca_desde_jan2023, valor: 1.17,    data_referencia: 2025-12-31, fonte: ibge_sidra}
+  - {indicador: contingenciamento_bi,        valor: 10.0,  data_referencia: 2026-12-31, fonte: relatorio_bimestral_4b, tipo: projecao}
+  - {indicador: despesas_discricionarias_bi, valor: 220.0, data_referencia: 2026-12-31, fonte: relatorio_bimestral_4b, tipo: projecao}
+  # R08 — RREO Anexo 9
+  - {indicador: receitas_operacoes_credito_bi, valor: 1300.0, data_referencia: 2026-08-31, fonte: siconfi_rreo_anexo_09}
+  - {indicador: despesas_capital_bi,           valor: 1050.0, data_referencia: 2026-08-31, fonte: siconfi_rreo_anexo_09}
+  - {indicador: creditos_maioria_absoluta_bi,  valor: 300.0,  data_referencia: 2026-08-31, fonte: loa_2026}
+  # R09–R14 — RGF (2º quadrimestre)
+  - {indicador: rcl_bi,                      valor: 1480.0, data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_01}
+  - {indicador: dtp_total_bi,                valor: 440.0,  data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_01}
+  - {indicador: dtp_executivo_bi,            valor: 370.0,  data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_01}
+  - {indicador: dtp_legislativo_incl_tcu_bi, valor: 14.0,   data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_01}
+  - {indicador: dtp_judiciario_bi,           valor: 50.0,   data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_01}
+  - {indicador: dtp_mpu_bi,                  valor: 8.5,    data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_01}
+  - {indicador: garantias_bi,                valor: 320.0,  data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_03}
+  - {indicador: operacoes_credito_rgf_bi,    valor: 900.0,  data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_04}
+  - {indicador: dcl_bi,                      valor: 6500.0, data_referencia: 2026-08-31, fonte: siconfi_rgf_anexo_02}
+  # R15 — dívida (% do PIB)
+  - {indicador: dbgg_pct_pib, valor: 77.6, data_referencia: 2026-01-31, fonte: bcb_sgs:13762}
+  - {indicador: dbgg_pct_pib, valor: 77.9, data_referencia: 2026-02-28, fonte: bcb_sgs:13762}
+  - {indicador: dbgg_pct_pib, valor: 78.1, data_referencia: 2026-03-31, fonte: bcb_sgs:13762}
+  - {indicador: dbgg_pct_pib, valor: 78.4, data_referencia: 2026-04-30, fonte: bcb_sgs:13762}
+  - {indicador: dbgg_pct_pib, valor: 78.5, data_referencia: 2026-05-31, fonte: bcb_sgs:13762}
+  - {indicador: dbgg_pct_pib, valor: 78.8, data_referencia: 2026-06-30, fonte: bcb_sgs:13762}
+  - {indicador: dbgg_pct_pib, valor: 79.0, data_referencia: 2026-07-31, fonte: bcb_sgs:13762}
+  - {indicador: dbgg_pct_pib, valor: 79.2, data_referencia: 2026-08-31, fonte: bcb_sgs:13762}
+  - {indicador: dlsp_pct_pib, valor: 63.1, data_referencia: 2026-01-31, fonte: bcb_sgs:4513}
+  - {indicador: dlsp_pct_pib, valor: 63.5, data_referencia: 2026-03-31, fonte: bcb_sgs:4513}
+  - {indicador: dlsp_pct_pib, valor: 64.2, data_referencia: 2026-05-31, fonte: bcb_sgs:4513}
+  - {indicador: dlsp_pct_pib, valor: 64.9, data_referencia: 2026-07-31, fonte: bcb_sgs:4513}
+  - {indicador: dlsp_pct_pib, valor: 65.3, data_referencia: 2026-08-31, fonte: bcb_sgs:4513}
+  - {indicador: trajetoria_ldo_dbgg_pct_pib, valor: 80.5, data_referencia: 2026-12-31, fonte: ldo_2026_amf, tipo: projecao}
+  # R16 / R17 — RREO Anexos 12 e 8
+  - {indicador: asps_bi,                     valor: 240.0, data_referencia: 2026-08-31, fonte: siconfi_rreo_anexo_12}
+  - {indicador: mde_bi,                      valor: 125.0, data_referencia: 2026-08-31, fonte: siconfi_rreo_anexo_08}
+  - {indicador: receita_liquida_impostos_bi, valor: 620.0, data_referencia: 2026-08-31, fonte: siconfi_rreo_anexo_08}

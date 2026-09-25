@@ -154,6 +154,14 @@ def _deducoes(ctx: Contexto, tipo_base: str) -> tuple[float, list[dict], list[st
     """Soma das despesas excluídas do cômputo da meta (somadas ao resultado)."""
     total, itens, notas = 0.0, [], []
     ordem = (tipo_base, "projecao" if tipo_base == "realizado" else "realizado")
+    # Quando a fonte (p. ex. o Relatório Bimestral) informa só o total deduzido, ele prevalece
+    # sobre a soma item a item do YAML.
+    informado = ctx.base.ultima("deducoes_meta_total_bi", tipo_base)
+    if informado is not None:
+        itens.append({"item": "Total de deduções informado", "base_legal": informado.nota,
+                      "valor_bruto_bi": informado.valor, "deduzido_bi": informado.valor,
+                      "fonte": informado.fonte})
+        return informado.valor, itens, notas
     for d in ctx.params_ano.get("deducoes", []) or []:
         nome = d["item"]
         if "tratamento_meta" in d and d["tratamento_meta"] is None:
@@ -198,7 +206,7 @@ def r01_meta_primaria(regra, ctx: Contexto) -> Resultado:
                           extras={"inferior": inferior, "centro": centro, "superior": superior})
 
     total_ded, itens, notas = _deducoes(ctx, "realizado" if base_ap != "projecao" else "projecao")
-    ajustado = obs.valor + total_ded
+    ajustado = round(obs.valor + total_ded, 6)      # evita −1e-14 abaixo do piso por arredondamento
 
     if inferior is None:
         status = st.PENDENTE
@@ -208,6 +216,17 @@ def r01_meta_primaria(regra, ctx: Contexto) -> Resultado:
         notas.append("Exercício aberto e sem projeção oficial: acumulado no ano não é comparável à meta anual.")
     else:
         status = st.meta_banda(ajustado, inferior, superior)
+
+    # Projeção oficial: a limitação de empenho (contingenciamento) anunciada no mesmo relatório
+    # reduz a despesa discricionária e entra no resultado esperado para o ano.
+    contingenciamento = ctx.base.ultima("contingenciamento_bi", "projecao") if base_ap == "projecao" else None
+    antes_contingenciamento = None
+    if contingenciamento is not None and contingenciamento.valor and inferior is not None:
+        antes_contingenciamento = ajustado
+        ajustado = round(ajustado + contingenciamento.valor, 6)
+        status = st.meta_banda(ajustado, inferior, superior)
+        notas.append(f"Resultado ajustado antes do contingenciamento: {_rs(antes_contingenciamento)}; "
+                     f"com a limitação de empenho de {_rs(contingenciamento.valor)}: {_rs(ajustado)}.")
 
     res = _novo(regra, status, valor=ajustado, unidade="R$ bi", limite=inferior,
                 tipo_limite="banda", base_apuracao=base_ap,
@@ -225,6 +244,7 @@ def r01_meta_primaria(regra, ctx: Contexto) -> Resultado:
         "projecao_fonte": projecao.fonte if projecao else None,
         "acima_linha": acima.valor if acima else None,
         "contingenciamento_mira_piso": meta.get("contingenciamento_mira_piso"),
+        "antes_contingenciamento": antes_contingenciamento,
     })
     if acima and realizado and acima.data_referencia == realizado.data_referencia:
         res.extras["discrepancia_estatistica"] = realizado.valor - acima.valor
@@ -575,6 +595,10 @@ def _minimo_aplicado(regra, ctx: Contexto, aplicado: str, minimo: str, denominad
         res.notas.append(f"Aplicado até {ap.data_referencia:%m/%Y} contra o mínimo anual; "
                          "o cumprimento só se apura com o 6º bimestre.")
     return res
+
+
+def _rs(v: float) -> str:
+    return ("−" if v < 0 else "") + f"R$ {_br(abs(v))} bi"
 
 
 def _br(v: float) -> str:

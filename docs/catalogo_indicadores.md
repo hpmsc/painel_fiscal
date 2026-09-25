@@ -9,6 +9,8 @@ dívida em **% do PIB** (ex.: 79,2). `tipo`: `realizado` (BCB, RTN, SICONFI) ou
 |---|---|---|---|---|
 | `primario_gc_abaixo_linha_bi` | R01 | realizado (acum. no ano) / projecao | BCB SGS 4639; Relatório Bimestral | **Superávit positivo.** SGS 4639 é fluxo mensal em R$ milhões com déficit positivo: o coletor aplica `fator: -0.001` e acumula no ano |
 | `primario_gc_acima_linha_bi` | R01 (referência) | realizado | STN RTN | Mostra a discrepância estatística |
+| `deducoes_meta_total_bi` | R01 | projecao | Relatório Bimestral (carga manual) | Total deduzido informado pela fonte; quando presente, prevalece sobre a soma item a item do YAML |
+| `bloqueio_limite_despesas_bi` | R02 (referência) | projecao | Relatório Bimestral (carga manual) | Bloqueio para cumprir o limite de despesas |
 | `despesas_fundo_social_bi` | R01 (dedução 2026) | projecao/realizado | LOA; Relatório Bimestral | LC 223/2025 |
 | `precatorios_bi` | R01 (dedução) | projecao/realizado | LOA; Relatório Bimestral | 2026: não deduzido até confirmar; 2027: deduz (1 − 39,4%) |
 | `despesas_excepcionalizadas_bi` | R01 (dedução 2027) | projecao | PLDO/LOA | Limitado a R$ 65,66 bi |
@@ -20,7 +22,7 @@ dívida em **% do PIB** (ex.: 79,2). `tipo`: `realizado` (BCB, RTN, SICONFI) ou
 | `investimentos_loa_bi` | R05 | projecao | SIOP (orcamentoBR) | GND 4 das despesas primárias (RP em `fontes.siop.rp_primarias`), dotação da LOA |
 | `pib_estimado_ploa_bi` | R05 | projecao | PLOA (carga manual) | |
 | `fator_ipca_desde_jan2023` | R06 | realizado | IBGE | Fator acumulado (ex.: 1,17) |
-| `contingenciamento_bi` | R07 | projecao | Relatório Bimestral; decretos (carga manual) | Não está no SIOP |
+| `contingenciamento_bi` | R07; R01 | projecao | Relatório Bimestral; decretos (carga manual) | Não está no SIOP. Na projeção do R01, é somado ao resultado ajustado (a limitação de empenho reduz a despesa) |
 | `despesas_discricionarias_bi` | R07 | projecao | SIOP (orcamentoBR) | RP em `fontes.siop.rp_discricionarias`, dotação atualizada |
 | `receitas_operacoes_credito_bi`, `despesas_capital_bi` | R08 | realizado | RREO Anexo 9 | |
 | `creditos_maioria_absoluta_bi` | R08 (ressalva) | realizado | Leis de crédito | Créditos suplementares/especiais aprovados por maioria absoluta |

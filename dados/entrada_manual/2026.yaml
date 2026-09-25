@@ -1,0 +1,42 @@
+# Entrada manual — fontes sem API. Cada observação cita a fonte.
+#
+# Relatório de Avaliação de Receitas e Despesas Primárias (RARDP) do 4º bimestre de 2026,
+# divulgado em 24/09/2026 (MF/MPO). Valores conferidos em várias coberturas jornalísticas
+# consistentes entre si (CNN Brasil, Correio Braziliense, Metrópoles, O Povo, SpaceMoney),
+# porque o PDF oficial não pôde ser baixado deste ambiente. Conferir no documento oficial:
+#   https://www.tesourotransparente.gov.br/publicacoes/relatorio-de-avaliacao-de-receitas-e-despesas-primarias-rardp
+# Conta de fechamento: −80,9 (primário) + 67,3 (deduções) = −13,6; contingenciamento de 13,6
+# leva o resultado ao piso da banda (R$ 0).
+#
+# Ainda NÃO preenchido (não divulgado nas fontes consultadas): limite e despesa sujeita ao
+# limite por Poder (R02), detalhamento das deduções do 4º bimestre, PIB estimado no PLOA (R05).
+exercicio: 2026
+observacoes:
+  - indicador: primario_gc_abaixo_linha_bi
+    valor: -80.9
+    tipo: projecao
+    data_referencia: 2026-12-31
+    data_coleta: 2026-09-25
+    fonte: rardp_4bim_2026
+    nota: "Resultado primário do Governo Central projetado para 2026, antes das deduções"
+  - indicador: deducoes_meta_total_bi
+    valor: 67.3
+    tipo: projecao
+    data_referencia: 2026-12-31
+    data_coleta: 2026-09-25
+    fonte: rardp_4bim_2026
+    nota: "Precatórios, saúde, educação e defesa (LDO 2026; EC 136/2025; LC 223/2025). 3º bim.: 62,8"
+  - indicador: contingenciamento_bi
+    valor: 13.6
+    tipo: projecao
+    data_referencia: 2026-12-31
+    data_coleta: 2026-09-25
+    fonte: rardp_4bim_2026
+    nota: "Limitação de empenho para a meta (LRF art. 9º); primeira do ano"
+  - indicador: bloqueio_limite_despesas_bi
+    valor: 2.4
+    tipo: projecao
+    data_referencia: 2026-12-31
+    data_coleta: 2026-09-25
+    fonte: rardp_4bim_2026
+    nota: "Bloqueio para o limite de despesas (LC 200/2023); 3º bim.: 17,9"

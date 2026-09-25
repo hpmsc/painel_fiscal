@@ -750,6 +750,46 @@
       "data_coleta": "2026-09-25",
       "tipo": "realizado",
       "nota": "RP 2,3,6,7,8,9, empenhado"
+    },
+    {
+      "indicador": "n_blocos_dtp_executivo",
+      "valor": 4,
+      "data_referencia": "2026-04-30",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-25",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_legislativo_incl_tcu",
+      "valor": 3,
+      "data_referencia": "2026-04-30",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-25",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_judiciario",
+      "valor": 65,
+      "data_referencia": "2026-04-30",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-25",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_mpu",
+      "valor": 2,
+      "data_referencia": "2026-04-30",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-25",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_judiciario",
+      "valor": 12,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-25",
+      "tipo": "realizado"
     }
   ]
 }

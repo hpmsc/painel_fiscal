@@ -24,3 +24,18 @@ def test_painel_vazio_renderiza(params):
     html = renderizar(params, 2027, apurar(params, 2027, BaseDados(2027)))
     assert "DADOS ILUSTRATIVOS" not in html
     assert "PLDO" in html
+
+
+def test_pendencia_de_deducao_some_com_total_informado(params):
+    import datetime as dt
+    from painel_fiscal.dados import Observacao
+    from painel_fiscal.painel.render import _pendencias
+
+    def o(ind, v):
+        return Observacao(indicador=ind, valor=v, data_referencia=dt.date(2026, 12, 31),
+                          fonte="rardp", tipo="projecao")
+    sem = _pendencias(params, 2026, apurar(params, 2026, BaseDados(2026, [o("primario_gc_abaixo_linha_bi", -80.9)])))
+    com = _pendencias(params, 2026, apurar(params, 2026, BaseDados(2026, [
+        o("primario_gc_abaixo_linha_bi", -80.9), o("deducoes_meta_total_bi", 67.3)])))
+    assert any("Precatórios" in p["texto"] for p in sem)
+    assert not any("Precatórios" in p["texto"] for p in com)

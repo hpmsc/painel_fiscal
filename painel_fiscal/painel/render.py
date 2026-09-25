@@ -260,7 +260,10 @@ def _pendencias(parametros: Parametros, exercicio: int, resultados: list[Resulta
     g = pano.get("gatilhos_art_6A") or {}
     if g.get("status") == "controversia":
         itens.append({"tipo": "Controvérsia", "regra": "R04", "texto": g.get("nota", "")})
-    for d in pano.get("deducoes", []) or []:
+    r01 = next((r for r in resultados if r.id == "R01"), None)
+    total_informado = r01 is not None and any(
+        d.get("item") == "Total de deduções informado" for d in r01.extras.get("deducoes", []))
+    for d in [] if total_informado else (pano.get("deducoes", []) or []):
         if d.get("verificar") or ("tratamento_meta" in d and d["tratamento_meta"] is None):
             itens.append({"tipo": "Verificar", "regra": "R01", "texto": f"Dedução “{d['item']}”: tratamento na meta."})
     if pano.get("crescimento_real_limite") is None:

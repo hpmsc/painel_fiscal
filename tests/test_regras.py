@@ -243,3 +243,16 @@ def test_r01_relatorio_bimestral_total_de_deducoes_e_contingenciamento(params, b
     assert r.valor == pytest.approx(0.0, abs=1e-9)
     assert r.status == st.CUMPRE
     assert any("antes do contingenciamento" in n for n in r.notas)
+
+
+def test_r01_fontes_e_r06_sem_excesso_com_relatorio(params, base):
+    b = base(2026,
+             obs("primario_gc_abaixo_linha_bi", -82.4, "2026-07-31", fonte="bcb_sgs:4639"),
+             obs("primario_gc_abaixo_linha_bi", -80.9, "2026-12-31", "projecao", fonte="rardp_4bim_2026"),
+             obs("deducoes_meta_total_bi", 67.3, "2026-12-31", "projecao", fonte="rardp_4bim_2026"),
+             obs("contingenciamento_bi", 13.6, "2026-12-31", "projecao", fonte="rardp_4bim_2026"))
+    res = por_id(params, 2026, b)
+    assert res["R01"].fontes == ["rardp_4bim_2026", "bcb_sgs:4639"]
+    assert res["R06"].valor == 0
+    assert any("não há excesso" in n for n in res["R06"].notas)
+    assert not any("IPCA" in n for n in res["R06"].notas)

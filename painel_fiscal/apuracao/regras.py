@@ -234,6 +234,12 @@ def r01_meta_primaria(regra, ctx: Contexto) -> Resultado:
                 folga=None if inferior is None else ajustado - inferior, notas=notas)
     if base_ap == "projecao":
         res.notas.insert(0, f"Status sobre projeção ({obs.fonte}); apuração oficial só com o dado de dezembro (BCB).")
+    # fontes efetivamente usadas: a do resultado, a do acumulado (se diferente) e as das deduções
+    usadas = [obs.fonte] + ([realizado.fonte] if realizado is not None else [])
+    usadas += [d["fonte"] for d in itens if d.get("fonte") and d["fonte"] != "YAML"]
+    if contingenciamento is not None:
+        usadas.append(contingenciamento.fonte)
+    res.fontes = list(dict.fromkeys(usadas))
     acima = ctx.base.ultima("primario_gc_acima_linha_bi", "realizado")
     res.extras.update({
         "inferior": inferior, "centro": centro, "superior": superior,
@@ -270,13 +276,17 @@ def r06_excesso_investimentos(regra, ctx: Contexto) -> Resultado:
         teto = base_nominal * fator.valor
     else:
         teto = base_nominal
-        notas.append("Sem fator IPCA (fator_ipca_desde_jan2023): teto exibido sem correção.")
     utilizavel = min(excesso, teto) if teto is not None else excesso
+    if excesso == 0:
+        notas.append(f"Resultado ajustado (R$ {_br(r01.valor)} bi) não supera o teto da banda "
+                     f"(R$ {_br(r01.extras['superior'])} bi): não há excesso a destinar a investimentos.")
+    elif fator is None:
+        notas.append("Sem fator IPCA (fator_ipca_desde_jan2023): teto exibido sem correção.")
     res = _novo(regra, st.INFORMATIVO, valor=excesso, unidade="R$ bi", limite=teto,
                 tipo_limite="maximo", base_apuracao=r01.base_apuracao,
                 data_referencia=r01.data_referencia, notas=notas)
     res.extras["utilizavel_bi"] = utilizavel
-    if r01.base_apuracao != "realizado":
+    if r01.base_apuracao != "realizado" and excesso > 0:
         res.notas.append("Excesso calculado sobre projeção; só vale com o resultado fechado do ano.")
     return res
 

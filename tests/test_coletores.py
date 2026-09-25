@@ -77,3 +77,31 @@ def test_sidra_converte():
     obs = ibge_sidra.converter("ipca_mensal", linhas, 1737, dt.date.today(), escala=0.01)
     assert len(obs) == 1 and obs[0].data_referencia == dt.date(2026, 6, 30)
     assert obs[0].valor == pytest.approx(0.0024)
+
+
+def test_bcb_acumula_fluxo_mensal_no_ano():
+    itens = [{"data": "01/11/2025", "valor": "10"}, {"data": "01/12/2025", "valor": "5"},
+             {"data": "01/01/2026", "valor": "-2"}, {"data": "01/02/2026", "valor": "3"}]
+    obs = bcb_sgs.converter("primario_gc_abaixo_linha_bi", itens, 4639, dt.date.today(),
+                            fator=-0.001, acumular_no_ano=True)
+    assert [round(o.valor, 4) for o in obs] == [-0.01, -0.015, 0.002, -0.001]
+    assert obs[1].data_referencia == dt.date(2025, 12, 31)
+
+
+def test_siconfi_filtra_cod_conta_periodo_e_instituicao():
+    itens = [
+        {"cod_conta": "DividaConsolidadaLiquida", "coluna": "Até o 2º Quadrimestre", "valor": 1e12},
+        {"cod_conta": "DividaConsolidadaLiquida", "coluna": "Até o 3º Quadrimestre", "valor": 2e12},
+        {"cod_conta": "DespesaComPessoalTotal", "coluna": "Valor", "instituicao": "Câmara", "valor": 4e9},
+        {"cod_conta": "DespesaComPessoalTotal", "coluna": "Valor", "instituicao": "Senado", "valor": 5e9},
+        {"cod_conta": "DespesaComPessoalTotal", "coluna": "% sobre a RCL", "instituicao": "Senado", "valor": 0.3},
+    ]
+    mapa = [{"indicador": "dcl_bi", "cod_conta": "DividaConsolidadaLiquida", "coluna": "^At[eé] o {periodo}º"},
+            {"indicador": "dtp_legislativo_incl_tcu_bi", "cod_conta": "DespesaComPessoalTotal",
+             "coluna": "^valor$", "somar": True},
+            {"indicador": "dtp_senado_bi", "cod_conta": "DespesaComPessoalTotal", "coluna": "^valor$",
+             "instituicao": "senado"}]
+    obs = {o.indicador: o.valor for o in siconfi.extrair(itens, mapa, dt.date(2025, 12, 31),
+                                                          dt.date.today(), "x", periodo=3)}
+    assert obs == {"dcl_bi": pytest.approx(2000), "dtp_legislativo_incl_tcu_bi": pytest.approx(9),
+                   "dtp_senado_bi": pytest.approx(5)}

@@ -46,20 +46,28 @@ def data_fim_periodo(demonstrativo: str, exercicio: int, periodo: int) -> dt.dat
 
 
 def extrair(itens: Iterable[dict[str, Any]], mapeamento: list[dict[str, Any]],
-            data_referencia: dt.date, data_coleta: dt.date, fonte: str) -> list[Observacao]:
-    """Aplica o mapeamento: cada entrada tem `indicador`, `anexo`, `conta` (regex),
-    `coluna` (regex), opcional `cod_conta` e `escala` (padrão 1e-9: R$ → R$ bi)."""
+            data_referencia: dt.date, data_coleta: dt.date, fonte: str,
+            periodo: int | None = None) -> list[Observacao]:
+    """Aplica o mapeamento. Cada entrada tem `indicador` e filtros opcionais:
+    `anexo` e `cod_conta` (exatos); `conta`, `coluna` e `instituicao` (regex, sem
+    diferenciar maiúsculas; `{periodo}` em `coluna` vira o número do período);
+    `somar` (soma as linhas que casarem) e `escala` (padrão 1e-9: R$ → R$ bi)."""
     itens = list(itens)
     obs = []
     for m in mapeamento:
-        re_conta = re.compile(m["conta"], re.I) if m.get("conta") else None
-        re_col = re.compile(m["coluna"], re.I) if m.get("coluna") else None
+        def _re(chave):
+            if not m.get(chave):
+                return None
+            padrao = m[chave].replace("{periodo}", str(periodo)) if periodo is not None else m[chave]
+            return re.compile(padrao, re.I)
+        re_conta, re_col, re_inst = _re("conta"), _re("coluna"), _re("instituicao")
         achados = [
             it for it in itens
-            if (not m.get("anexo") or it.get("anexo") == m["anexo"])
+            if (not m.get("anexo") or it.get("anexo", m["anexo"]) == m["anexo"])
             and (not m.get("cod_conta") or it.get("cod_conta") == m["cod_conta"])
             and (re_conta is None or re_conta.search(str(it.get("conta", ""))))
             and (re_col is None or re_col.search(str(it.get("coluna", ""))))
+            and (re_inst is None or re_inst.search(str(it.get("instituicao", ""))))
         ]
         if not achados:
             continue
@@ -92,4 +100,4 @@ def coletar(demonstrativo: str, exercicio: int, periodo: int, anexo: str,
     fonte = f"siconfi_{demonstrativo}_{anexo}".lower().replace(" ", "_")
     ref = data_fim_periodo(demonstrativo, exercicio, periodo)
     return extrair(itens, [m for m in mapeamento if m.get("anexo") in (None, anexo)],
-                   ref, hoje, fonte)
+                   ref, hoje, fonte, periodo)

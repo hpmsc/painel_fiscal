@@ -26,11 +26,24 @@ def fim_do_mes(d: dt.date) -> dt.date:
 
 
 def converter(indicador: str, itens: list[dict[str, Any]], codigo: int,
-              data_coleta: dt.date, fator: float = 1.0) -> list[Observacao]:
+              data_coleta: dt.date, fator: float = 1.0,
+              acumular_no_ano: bool = False) -> list[Observacao]:
     """Converte a resposta do SGS ([{"data": "dd/mm/aaaa", "valor": "1,23"}...]).
 
     Séries mensais do SGS vêm datadas no dia 1º; a referência vira o fim do mês.
+    `acumular_no_ano` transforma fluxo mensal em acumulado jan–mês (zera a cada ano).
     """
+    if acumular_no_ano:
+        mensal = sorted(converter(indicador, itens, codigo, data_coleta, fator),
+                        key=lambda o: o.data_referencia)
+        acumulado, ano, soma = [], None, 0.0
+        for o in mensal:
+            if o.data_referencia.year != ano:
+                ano, soma = o.data_referencia.year, 0.0
+            soma += o.valor
+            acumulado.append(Observacao(**{**o.__dict__, "valor": soma,
+                                           "nota": "acumulado no ano"}))
+        return acumulado
     obs = []
     for it in itens:
         bruto = str(it["valor"]).strip()
@@ -47,7 +60,7 @@ def converter(indicador: str, itens: list[dict[str, Any]], codigo: int,
 
 def coletar(indicador: str, codigo: int, data_inicial: dt.date,
             data_final: dt.date | None = None, fator: float = 1.0,
-            sessao=None) -> list[Observacao]:
+            acumular_no_ano: bool = False, sessao=None) -> list[Observacao]:
     url = URL.format(codigo=codigo)
     params = {"formato": "json", "dataInicial": data_inicial.strftime("%d/%m/%Y")}
     if data_final:
@@ -55,4 +68,4 @@ def coletar(indicador: str, codigo: int, data_inicial: dt.date,
     itens = obter_json(url, params, sessao)
     hoje = dt.date.today()
     gravar_bruto("bcb_sgs", f"{indicador}_{codigo}", itens, url, params, hoje)
-    return converter(indicador, itens, codigo, hoje, fator)
+    return converter(indicador, itens, codigo, hoje, fator, acumular_no_ano)

@@ -32,6 +32,15 @@ python -m painel_fiscal painel --exercicio 2026      # → saida/painel_2026.htm
 python -m pytest
 ```
 
+## Publicação (GitHub Actions + Pages)
+
+O workflow `.github/workflows/painel.yml` roda os testes em todo PR e push. Em push na
+`main`, gera o painel do exercício `EXERCICIO` (2026) e publica como `index.html` no
+GitHub Pages. Usa os dados de `dados/tratados/` e `dados/entrada_manual/` quando existirem;
+senão, os dados ilustrativos (com o aviso de dados fictícios na página).
+
+Para ativar: *Settings → Pages → Build and deployment → Source: GitHub Actions*.
+
 ## Estrutura
 
 ```

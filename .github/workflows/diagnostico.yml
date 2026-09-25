@@ -1,0 +1,43 @@
+name: Diagnóstico das fontes
+
+# Baixa respostas reais do BCB, SICONFI, IBGE e Tesouro para confirmar os itens
+# "⚠ verificar" (códigos SGS, id_ente da União, rótulos do SICONFI). Não altera o
+# repositório: o resultado fica no resumo do job e no artefato "diagnostico".
+on:
+  workflow_dispatch:
+    inputs:
+      exercicio:
+        description: "Exercício (use um ano fechado, ex.: 2025)"
+        default: "2025"
+  pull_request:
+    paths:
+      - scripts/diagnostico.py
+      - .github/workflows/diagnostico.yml
+      - config/mapeamento_siconfi.yaml
+      - config/parametros_regras_fiscais_uniao.yaml
+      - painel_fiscal/coletores/**
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostico:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Consultar fontes
+        run: python scripts/diagnostico.py --exercicio "${{ inputs.exercicio || '2025' }}" --saida diagnostico
+      - name: Resumo do job
+        if: always()
+        run: head -c 900000 diagnostico/resumo.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: diagnostico
+          path: diagnostico/

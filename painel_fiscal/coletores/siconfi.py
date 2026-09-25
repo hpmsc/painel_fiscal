@@ -51,7 +51,8 @@ def extrair(itens: Iterable[dict[str, Any]], mapeamento: list[dict[str, Any]],
     """Aplica o mapeamento. Cada entrada tem `indicador` e filtros opcionais:
     `anexo` e `cod_conta` (exatos); `conta`, `coluna` e `instituicao` (regex, sem
     diferenciar maiúsculas; `{periodo}` em `coluna` vira o número do período);
-    `somar` (soma as linhas que casarem) e `escala` (padrão 1e-9: R$ → R$ bi)."""
+    `somar` (soma as linhas que casarem), `contar` (grava o número de linhas, p. ex. blocos
+    de instituições) e `escala` (padrão 1e-9: R$ → R$ bi)."""
     itens = list(itens)
     obs = []
     for m in mapeamento:
@@ -71,11 +72,12 @@ def extrair(itens: Iterable[dict[str, Any]], mapeamento: list[dict[str, Any]],
         ]
         if not achados:
             continue
-        if len(achados) > 1 and not m.get("somar", False):
+        if len(achados) > 1 and not (m.get("somar") or m.get("contar")):
             raise ValueError(
                 f"{m['indicador']}: {len(achados)} linhas casam com o mapeamento; "
                 "refine conta/coluna ou use somar: true")
-        valor = sum(float(it["valor"]) for it in achados) * m.get("escala", 1e-9)
+        valor = (len(achados) if m.get("contar")
+                 else sum(float(it["valor"]) for it in achados) * m.get("escala", 1e-9))
         obs.append(Observacao(indicador=m["indicador"], valor=valor,
                               data_referencia=data_referencia, data_coleta=data_coleta,
                               fonte=fonte, tipo="realizado"))

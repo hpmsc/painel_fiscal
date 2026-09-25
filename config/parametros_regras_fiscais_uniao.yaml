@@ -58,7 +58,7 @@ regras:
     indicador: "investimentos_loa / pib_estimado_ploa"
     limite: 0.006
     tipo_limite: minimo
-    fonte: [loa, siop]
+    fonte: [siop, ploa]
     frequencia: anual
     verificar: true
 
@@ -79,7 +79,7 @@ regras:
     base_legal: ["LRF art. 9º", "LC 200/2023"]
     indicador: "contingenciamento / despesas_discricionarias"
     limite: null            # teto de contingenciamento: verificar na LC 200
-    fonte: [relatorio_bimestral, decretos_programacao]
+    fonte: [relatorio_bimestral, decretos_programacao, siop]
     frequencia: bimestral
     verificar: true
 
@@ -165,7 +165,7 @@ regras:
     indicador: "asps / rcl"
     limite: 0.15
     tipo_limite: minimo
-    fonte: [siconfi_rreo_anexo_12]
+    fonte: [siconfi_rreo_anexo_14]   # União: Anexo 14 (simplificado)
     frequencia: bimestral
 
   - id: R17
@@ -174,7 +174,7 @@ regras:
     indicador: "mde / receita_liquida_impostos"
     limite: 0.18
     tipo_limite: minimo
-    fonte: [siconfi_rreo_anexo_08]
+    fonte: [siconfi_rreo_anexo_14]   # União: Anexo 14 (simplificado)
     frequencia: bimestral
 
 exercicios:

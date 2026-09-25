@@ -95,4 +95,5 @@ def test_mapeamento_casa_com_linhas_reais_do_rgf():
     ]
     obs = {x.indicador: x.valor for x in siconfi.extrair(linhas, pessoal, dt.date(2025, 12, 31),
                                                           dt.date.today(), "t", periodo=3)}
-    assert obs == {"dtp_mpu_bi": pytest.approx(7.04), "limite_dtp_mpu_bi": pytest.approx(11.13)}
+    assert obs == {"dtp_mpu_bi": pytest.approx(7.04), "limite_dtp_mpu_bi": pytest.approx(11.13),
+                   "n_blocos_dtp_mpu": 2}                               # MPU e MPDFT

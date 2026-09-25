@@ -1,8 +1,8 @@
 name: Coleta
 
 # Coleta semanal das fontes com API (BCB SGS, SICONFI e SIOP) e grava as observações em
-# dados/tratados/<exercício>.json, com commit na main. Ao terminar, o workflow "Painel"
-# roda (gatilho workflow_run) e republica a página com os dados novos.
+# dados/tratados/<exercício>.json, com commit na main. Ao terminar, dispara o workflow
+# "Painel" (workflow_dispatch na main), que republica a página com os dados novos.
 on:
   schedule:
     - cron: "37 11 * * 1"          # segundas, 11h37 UTC (8h37 em Brasília)
@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  actions: write            # disparar o workflow Painel ao final
 
 concurrency:
   group: coleta
@@ -61,3 +62,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Coleta automática: exercício $EXERCICIO ($(date -u +%Y-%m-%d))"
           git push
+      # Commits do GITHUB_TOKEN não disparam "push"; workflow_dispatch é a exceção permitida.
+      # Roda na main já com o commit dos dados, então o Painel publica a versão nova.
+      - name: Republicar o painel
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run painel.yml --ref main --repo "$GITHUB_REPOSITORY"

@@ -104,7 +104,7 @@ regras:
   - id: R10
     nome: "Despesa com pessoal — por Poder"
     base_legal: ["LRF art. 20, I"]
-    indicador: "dtp_poder / rcl"
+    indicador: "dtp_poder / limite oficial do RGF (soma dos blocos do Poder); sem ele, dtp_poder / rcl vs. limites abaixo"
     limites:
       executivo: 0.409
       legislativo_incl_tcu: 0.025
@@ -127,20 +127,19 @@ regras:
     nome: "Garantias concedidas pela União"
     base_legal: ["Res. Senado 48/2007"]
     indicador: "saldo_garantias / rcl"
-    limite: 0.60            # referência usual — verificar
+    limite: 0.60            # confirmado: RGF Anexo 3 (2025) traz limite = 60% da RCL
     fonte: [siconfi_rgf_anexo_03]
     frequencia: quadrimestral
     status: percentual
-    verificar: true
 
   - id: R13
     nome: "Operações de crédito da União"
     base_legal: ["Res. Senado 48/2007"]
     indicador: "operacoes_credito / rcl"
-    limite: null            # verificar
+    limite: 0.60            # confirmado: RGF Anexo 4 (2025) traz limite geral = 60% da RCL
     fonte: [siconfi_rgf_anexo_04]
     frequencia: quadrimestral
-    verificar: true
+    status: percentual
 
   - id: R14
     nome: "Dívida consolidada líquida da União"
@@ -230,11 +229,14 @@ fontes:
   bcb_sgs:
     url: "https://api.bcb.gov.br/dados/serie/bcdata.sgs.{codigo}/dados?formato=json&dataInicial={dd/mm/aaaa}"
     series:
-      dbgg_pct_pib: 13762          # verificar
-      dlsp_pct_pib: 4513           # verificar
-      # dados de 2026 ainda sem série trajetória: a projeção da LDO entra como
-      # indicador trajetoria_ldo_dbgg_pct_pib (carga manual, Anexo de Metas Fiscais)
-      primario_governo_central: null  # identificar no catálogo SGS
+      # confirmados no catálogo de dados abertos do BCB (diagnóstico de 25/09/2026)
+      dbgg_pct_pib: 13762          # DBGG (% PIB), metodologia a partir de 2008
+      dlsp_pct_pib: 4513           # DLSP (% PIB), setor público consolidado
+      primario_gc_abaixo_linha_bi:
+        codigo: 4639               # NFSP s/ desv. cambial, fluxo mensal, primário, Gov. Federal e BCB
+        fator: -0.001              # R$ milhões, déficit positivo → R$ bi, superávit positivo
+        acumular_no_ano: true
+      # A trajetória da LDO entra como trajetoria_ldo_dbgg_pct_pib (carga manual).
   stn_rtn:
     url: "https://www.tesourotransparente.gov.br/ckan/api/3/action/package_search?q=resultado+do+tesouro+nacional"
     formato: xlsx
@@ -242,7 +244,7 @@ fontes:
     rreo: "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/rreo"
     rgf: "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/rgf"
     parametros: [an_exercicio, nr_periodo, co_tipo_demonstrativo, no_anexo, id_ente, co_poder]
-    id_ente_uniao: 1               # verificar
+    id_ente_uniao: 1               # confirmado: cod_ibge 1, esfera U
   ibge_sidra:
     url: "https://apisidra.ibge.gov.br/values/t/{tabela}/..."
     tabelas: { ipca: 1737, pib_corrente_trimestral: 1846 }   # verificar variáveis

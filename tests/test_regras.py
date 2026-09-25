@@ -142,9 +142,11 @@ def test_pessoal_r09_r10_r11(params, base):
 
 
 def test_limite_a_confirmar_vira_pendente(params, base):
-    b = base(2026, obs("rcl_bi", 1000), obs("operacoes_credito_rgf_bi", 600), obs("dcl_bi", 6000))
+    b = base(2026, obs("contingenciamento_bi", 10, "2026-12-31", "projecao"),
+             obs("despesas_discricionarias_bi", 200, "2026-12-31", "projecao"),
+             obs("rcl_bi", 1000), obs("dcl_bi", 6000))
     res = por_id(params, 2026, b)
-    assert res["R13"].status == st.PENDENTE            # limite null + verificar
+    assert res["R07"].status == st.PENDENTE            # limite null + verificar
     assert res["R14"].status == st.MONITORAMENTO       # sem limite legal
 
 
@@ -170,3 +172,12 @@ def test_exemplo_ilustrativo_apura_tudo(params):
     res = apurar(params, 2026, b)
     assert len(res) == 17
     assert all(r.status != st.SEM_DADOS for r in res)
+
+
+def test_r09_soma_os_poderes_quando_falta_total(params, base):
+    b = base(2026, obs("rcl_bi", 1000), obs("dtp_executivo_bi", 300),
+             obs("dtp_legislativo_incl_tcu_bi", 12), obs("dtp_judiciario_bi", 50), obs("dtp_mpu_bi", 7))
+    r = por_id(params, 2026, b)["R09"]
+    assert r.valor == pytest.approx(0.369)
+    b2 = base(2026, obs("rcl_bi", 1000), obs("dtp_executivo_bi", 300))   # Poder faltando: não soma
+    assert por_id(params, 2026, b2)["R09"].status == st.SEM_DADOS

@@ -61,11 +61,14 @@ def cmd_coletar_bcb(args) -> int:
     p = config.carregar(args.config)
     series = p.fontes["bcb_sgs"]["series"]
     novas = []
-    for indicador, codigo in series.items():
-        if codigo is None:
+    for indicador, serie in series.items():
+        serie = serie if isinstance(serie, dict) else {"codigo": serie}
+        if serie.get("codigo") is None:
             print(f"! {indicador}: código SGS não definido no YAML — ignorado", file=sys.stderr)
             continue
-        novas += bcb_sgs.coletar(indicador, int(codigo), dt.date.fromisoformat(args.desde))
+        novas += bcb_sgs.coletar(indicador, int(serie["codigo"]), dt.date.fromisoformat(args.desde),
+                                 fator=serie.get("fator", 1.0),
+                                 acumular_no_ano=serie.get("acumular_no_ano", False))
     print(f"{len(novas)} observações → {_acrescentar_tratados(args.exercicio, novas)}")
     return 0
 
@@ -79,13 +82,13 @@ def cmd_coletar_siconfi(args) -> int:
     novas = []
     for anexo in sorted({m["anexo"] for m in mapa[args.demonstrativo]}):
         novas += siconfi.coletar(args.demonstrativo, args.exercicio, args.periodo, anexo,
-                                 mapa[args.demonstrativo], id_ente)
+                                 mapa[args.demonstrativo], id_ente,
+                                 co_poder="E" if args.demonstrativo == "rgf" else None)
     if args.demonstrativo == "rgf":
-        for poder, indicador in mapa.get("rgf_por_poder", {}).items():
-            m = [{"indicador": indicador, "anexo": "RGF-Anexo 01",
-                  "conta": "DESPESA TOTAL COM PESSOAL", "coluna": "^VALOR"}]
+        for co_poder, nome in mapa.get("rgf_por_poder", {}).items():
+            m = [{**e, "indicador": e["indicador"].format(poder=nome)} for e in mapa["rgf_pessoal"]]
             novas += siconfi.coletar("rgf", args.exercicio, args.periodo, "RGF-Anexo 01", m,
-                                     id_ente, co_poder=poder)
+                                     id_ente, co_poder=co_poder)
     print(f"{len(novas)} observações → {_acrescentar_tratados(args.exercicio, novas)}")
     return 0
 

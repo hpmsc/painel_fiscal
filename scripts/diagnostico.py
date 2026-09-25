@@ -89,7 +89,8 @@ def sgs(rel: Relatorio, params: config.Parametros) -> None:
         rel.gravar_json(f"sgs_{codigo}", dados)
         rel(f"- {codigo}: {dados}")
     rel("\n### Últimos valores das séries do YAML\n")
-    for indicador, codigo in params.fontes["bcb_sgs"]["series"].items():
+    for indicador, serie in params.fontes["bcb_sgs"]["series"].items():
+        codigo = serie.get("codigo") if isinstance(serie, dict) else serie
         if codigo is None:
             rel(f"- `{indicador}`: sem código no YAML")
             continue
@@ -178,7 +179,7 @@ def _testar_mapeamento(rel: Relatorio, itens: list[dict], mapeamento: list[dict]
 
 
 def anexos_disponiveis(rel: Relatorio, exercicio: int, id_ente: int) -> None:
-    resp = obter_json(ANEXOS_RELATORIOS)
+    resp = obter_json(ANEXOS_RELATORIOS, timeout=300)
     itens = resp.get("items", [])
     rel.gravar_json("siconfi_anexos_relatorios", itens)
     uniao = [a for a in itens if str(a.get("esfera", "")).upper() in ("U", "UNIÃO", "UNIAO")] or itens

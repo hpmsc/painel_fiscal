@@ -7,7 +7,7 @@ dívida em **% do PIB** (ex.: 79,2). `tipo`: `realizado` (BCB, RTN, SICONFI) ou
 
 | Indicador | Regra | Tipo usual | Fonte | Observação |
 |---|---|---|---|---|
-| `primario_gc_abaixo_linha_bi` | R01 | realizado (acum. no ano) / projecao | BCB SGS; Relatório Bimestral | **Superávit positivo.** NFSP do BCB vem com déficit positivo: coletar com `fator=-1`. Código SGS a identificar |
+| `primario_gc_abaixo_linha_bi` | R01 | realizado (acum. no ano) / projecao | BCB SGS 4639; Relatório Bimestral | **Superávit positivo.** SGS 4639 é fluxo mensal em R$ milhões com déficit positivo: o coletor aplica `fator: -0.001` e acumula no ano |
 | `primario_gc_acima_linha_bi` | R01 (referência) | realizado | STN RTN | Mostra a discrepância estatística |
 | `despesas_fundo_social_bi` | R01 (dedução 2026) | projecao/realizado | LOA; Relatório Bimestral | LC 223/2025 |
 | `precatorios_bi` | R01 (dedução) | projecao/realizado | LOA; Relatório Bimestral | 2026: não deduzido até confirmar; 2027: deduz (1 − 39,4%) |
@@ -23,12 +23,14 @@ dívida em **% do PIB** (ex.: 79,2). `tipo`: `realizado` (BCB, RTN, SICONFI) ou
 | `receitas_operacoes_credito_bi`, `despesas_capital_bi` | R08 | realizado | RREO Anexo 9 | |
 | `creditos_maioria_absoluta_bi` | R08 (ressalva) | realizado | Leis de crédito | Créditos suplementares/especiais aprovados por maioria absoluta |
 | `rcl_bi` | R09–R14, R16 | realizado | RGF Anexo 1 | |
-| `dtp_total_bi` | R09 | realizado | RGF Anexo 1 | |
-| `dtp_{executivo,legislativo_incl_tcu,judiciario,mpu}_bi` | R10/R11 | realizado | RGF Anexo 1 por Poder | chave = nome do limite no YAML |
+| `dtp_total_bi` | R09 | realizado | RGF Anexo 1 | Se ausente, soma dos quatro Poderes |
+| `dtp_{executivo,legislativo_incl_tcu,judiciario,mpu}_bi` | R10/R11 | realizado | RGF Anexo 1 por Poder | Soma dos blocos (instituição/rótulo) do Poder |
+| `limite_dtp_{poder}_bi` | R10/R11 | realizado | RGF Anexo 1 por Poder | Soma dos limites oficiais dos blocos; respeita a repartição do art. 20 (inclusive os 3% do DF/ex-territórios). Sem ele, usa o % do YAML |
+| `limite_garantias_senado_bi`, `limite_operacoes_credito_senado_bi` | R12/R13 | realizado | RGF Anexos 3 e 4 | Limites publicados (60% da RCL em 2025); conferência |
 | `garantias_bi` | R12 | realizado | RGF Anexo 3 | |
 | `operacoes_credito_rgf_bi` | R13 | realizado | RGF Anexo 4 | |
 | `dcl_bi` | R14 | realizado | RGF Anexo 2 | |
-| `dbgg_pct_pib`, `dlsp_pct_pib` | R15 | realizado (série mensal) | BCB SGS 13762 / 4513 (⚠) | |
+| `dbgg_pct_pib`, `dlsp_pct_pib` | R15 | realizado (série mensal) | BCB SGS 13762 / 4513 | Confirmados |
 | `trajetoria_ldo_dbgg_pct_pib` | R15 | projecao | Anexo de Metas Fiscais da LDO | Um ponto por fim de ano |
 | `asps_bi` | R16 | realizado | RREO Anexo 12 | |
 | `mde_bi`, `receita_liquida_impostos_bi` | R17 | realizado | RREO Anexo 8 | |

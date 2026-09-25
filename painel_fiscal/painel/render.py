@@ -271,12 +271,13 @@ def _pendencias(parametros: Parametros, exercicio: int, resultados: list[Resulta
                           "texto": f"{r.nome}: base legal ou limite a confirmar na fonte primária."})
     fontes = parametros.fontes
     series = (fontes.get("bcb_sgs") or {}).get("series", {})
-    faltando = [k for k, v in series.items() if v is None]
+    faltando = [k for k, v in series.items()
+                if v is None or (isinstance(v, dict) and v.get("codigo") is None)]
     if faltando:
         itens.append({"tipo": "Identificar", "regra": "Fontes",
                       "texto": "Código SGS ausente: " + ", ".join(faltando) + "."})
-    itens.append({"tipo": "Verificar", "regra": "Fontes",
-                  "texto": "Códigos SGS (DBGG, DLSP), id_ente da União no SICONFI e mapeamento de contas."})
+    itens.append({"tipo": "Identificar", "regra": "R16/R17",
+                  "texto": "Nome dos anexos de saúde (ASPS) e educação (MDE) do RREO da União no SICONFI."})
     return itens
 
 

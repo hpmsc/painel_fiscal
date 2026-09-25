@@ -17,9 +17,9 @@ CABECALHOS = {"User-Agent": "painel-fiscal-uniao/0.1 (+https://github.com/hpmsc/
 
 
 def obter_json(url: str, params: dict[str, Any] | None = None,
-               sessao: requests.Session | None = None) -> Any:
+               sessao: requests.Session | None = None, timeout: int = TIMEOUT) -> Any:
     s = sessao or requests
-    r = s.get(url, params=params, timeout=TIMEOUT, headers=CABECALHOS)
+    r = s.get(url, params=params, timeout=timeout, headers=CABECALHOS)
     r.raise_for_status()
     return r.json()
 

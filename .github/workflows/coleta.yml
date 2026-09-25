@@ -1,0 +1,54 @@
+name: Coleta
+
+# Coleta semanal das fontes com API (BCB SGS e SICONFI) e grava as observações em
+# dados/tratados/<exercício>.json, com commit na main. Ao terminar, o workflow "Painel"
+# roda (gatilho workflow_run) e republica a página com os dados novos.
+on:
+  schedule:
+    - cron: "37 11 * * 1"          # segundas, 11h37 UTC (8h37 em Brasília)
+  workflow_dispatch:
+    inputs:
+      exercicio:
+        description: "Exercício a coletar"
+        default: "2026"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: coleta
+  cancel-in-progress: false
+
+env:
+  EXERCICIO: ${{ inputs.exercicio || '2026' }}
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: BCB (primário, DBGG, DLSP)
+        run: python -m painel_fiscal coletar-bcb --exercicio "$EXERCICIO" --desde "$((EXERCICIO - 1))-01-01"
+      - name: SICONFI RGF (quadrimestres publicados)
+        run: python -m painel_fiscal coletar-siconfi --exercicio "$EXERCICIO" --demonstrativo rgf --periodo 1 2 3
+      - name: SICONFI RREO (bimestres publicados)
+        run: python -m painel_fiscal coletar-siconfi --exercicio "$EXERCICIO" --demonstrativo rreo --periodo 1 2 3 4 5 6
+      - name: Testes
+        run: python -m pytest -q
+      - name: Gravar dados coletados
+        run: |
+          git add dados/tratados/
+          if git diff --cached --quiet; then
+            echo "Nenhuma observação nova."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Coleta automática: exercício $EXERCICIO ($(date -u +%Y-%m-%d))"
+          git push

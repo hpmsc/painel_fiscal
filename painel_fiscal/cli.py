@@ -3,7 +3,7 @@
     python -m painel_fiscal painel --exercicio 2026 --dados dados/tratados/2026.json dados/entrada_manual/2026.yaml
     python -m painel_fiscal apurar --exercicio 2026 --dados ...          # tabela no terminal
     python -m painel_fiscal coletar-bcb --exercicio 2026 --desde 2025-01-01
-    python -m painel_fiscal coletar-siconfi --exercicio 2026 --demonstrativo rgf --periodo 2
+    python -m painel_fiscal coletar-siconfi --exercicio 2026 --demonstrativo rgf --periodo 1 2 3
 """
 from __future__ import annotations
 
@@ -28,11 +28,25 @@ def _base(args) -> dados.BaseDados:
     return dados.carregar_varios(args.exercicio, caminhos)
 
 
-def _acrescentar_tratados(exercicio: int, novas: list[dados.Observacao]) -> Path:
-    destino = DIR_TRATADOS / f"{exercicio}.json"
+def _chave(o: dados.Observacao) -> tuple:
+    return (o.indicador, o.data_referencia, o.tipo, o.fonte, round(float(o.valor), 6))
+
+
+def _acrescentar_tratados(exercicio: int, novas: list[dados.Observacao],
+                          diretorio: Path | None = None) -> Path:
+    """Acrescenta observações novas. Uma coleta que repete valor já gravado (mesmo
+    indicador, referência, tipo e fonte) é ignorada; valor diferente é revisão e fica."""
+    destino = (diretorio or DIR_TRATADOS) / f"{exercicio}.json"
     base = dados.carregar_arquivo(destino) if destino.exists() else dados.BaseDados(exercicio)
-    base.adicionar(novas)
+    vistas = {_chave(o) for o in base.observacoes}
+    ineditas = []
+    for o in novas:
+        if _chave(o) not in vistas:
+            vistas.add(_chave(o))
+            ineditas.append(o)
+    base.adicionar(ineditas)
     dados.salvar_json(base, destino)
+    print(f"{len(ineditas)} observações novas de {len(novas)} coletadas")
     return destino
 
 
@@ -69,7 +83,7 @@ def cmd_coletar_bcb(args) -> int:
         novas += bcb_sgs.coletar(indicador, int(serie["codigo"]), dt.date.fromisoformat(args.desde),
                                  fator=serie.get("fator", 1.0),
                                  acumular_no_ano=serie.get("acumular_no_ano", False))
-    print(f"{len(novas)} observações → {_acrescentar_tratados(args.exercicio, novas)}")
+    print(f"→ {_acrescentar_tratados(args.exercicio, novas)}")
     return 0
 
 
@@ -80,16 +94,17 @@ def cmd_coletar_siconfi(args) -> int:
     with open(RAIZ / "config" / "mapeamento_siconfi.yaml", encoding="utf-8") as f:
         mapa = yaml.safe_load(f)
     novas = []
-    for anexo in sorted({m["anexo"] for m in mapa[args.demonstrativo]}):
-        novas += siconfi.coletar(args.demonstrativo, args.exercicio, args.periodo, anexo,
-                                 mapa[args.demonstrativo], id_ente,
-                                 co_poder="E" if args.demonstrativo == "rgf" else None)
-    if args.demonstrativo == "rgf":
-        for co_poder, nome in mapa.get("rgf_por_poder", {}).items():
-            m = [{**e, "indicador": e["indicador"].format(poder=nome)} for e in mapa["rgf_pessoal"]]
-            novas += siconfi.coletar("rgf", args.exercicio, args.periodo, "RGF-Anexo 01", m,
-                                     id_ente, co_poder=co_poder)
-    print(f"{len(novas)} observações → {_acrescentar_tratados(args.exercicio, novas)}")
+    for periodo in args.periodo:
+        for anexo in sorted({m["anexo"] for m in mapa[args.demonstrativo]}):
+            novas += siconfi.coletar(args.demonstrativo, args.exercicio, periodo, anexo,
+                                     mapa[args.demonstrativo], id_ente,
+                                     co_poder="E" if args.demonstrativo == "rgf" else None)
+        if args.demonstrativo == "rgf":
+            for co_poder, nome in mapa.get("rgf_por_poder", {}).items():
+                m = [{**e, "indicador": e["indicador"].format(poder=nome)} for e in mapa["rgf_pessoal"]]
+                novas += siconfi.coletar("rgf", args.exercicio, periodo, "RGF-Anexo 01", m,
+                                         id_ente, co_poder=co_poder)
+    print(f"→ {_acrescentar_tratados(args.exercicio, novas)}")
     return 0
 
 
@@ -115,7 +130,8 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("coletar-siconfi")
     s.add_argument("--exercicio", type=int, required=True)
     s.add_argument("--demonstrativo", choices=["rreo", "rgf"], required=True)
-    s.add_argument("--periodo", type=int, required=True)
+    s.add_argument("--periodo", type=int, nargs="+", required=True,
+                   help="um ou mais períodos (RGF 1–3, RREO 1–6); período ainda não publicado vem vazio")
     s.set_defaults(fn=cmd_coletar_siconfi)
 
     args = ap.parse_args(argv)

@@ -26,6 +26,8 @@ rgf_por_poder:
 rgf_pessoal:
   - {indicador: "dtp_{poder}_bi",        anexo: "RGF-Anexo 01", cod_conta: DespesaComPessoalTotal,             coluna: "^valor$", somar: true}
   - {indicador: "limite_dtp_{poder}_bi", anexo: "RGF-Anexo 01", cod_conta: LimiteMaximoDespesaComPessoalTotal, coluna: "^valor$", somar: true}
+  # nº de blocos publicados: detecta quadrimestre ainda incompleto (tribunais que não enviaram o RGF)
+  - {indicador: "n_blocos_dtp_{poder}",  anexo: "RGF-Anexo 01", cod_conta: DespesaComPessoalTotal,             coluna: "^valor$", contar: true}
 
 rreo:
   - {indicador: receitas_operacoes_credito_bi, anexo: "RREO-Anexo 09", cod_conta: ReceitasDeOperacoesDeCreditoRegraDeOuro, coluna: "^receitas realizadas$"}

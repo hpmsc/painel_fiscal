@@ -4,12 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
-  # commits feitos pelo GITHUB_TOKEN (coleta) não disparam "push"; este gatilho republica
-  workflow_run:
-    workflows: [Coleta]
-    types: [completed]
-    branches: [main]
+  workflow_dispatch:           # também disparado pela Coleta ao final
 
 permissions:
   contents: read
@@ -59,9 +54,7 @@ jobs:
           path: _site
 
   publicar:
-    if: >-
-      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' &&
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: gerar
     runs-on: ubuntu-latest
     permissions:

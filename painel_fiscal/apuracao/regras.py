@@ -239,6 +239,9 @@ def r06_excesso_investimentos(regra, ctx: Contexto) -> Resultado:
         return _novo(regra, st.INFORMATIVO, notas=[f"Fora da vigência ({ini}–{fim})."])
     if r01 is None or r01.valor is None or r01.extras.get("superior") is None:
         return _sem_dados(regra, ["R01 (resultado ajustado e teto da banda)"], unidade="R$ bi")
+    if r01.base_apuracao == "parcial":
+        return _novo(regra, st.EM_APURACAO, unidade="R$ bi", base_apuracao="parcial",
+                     notas=["Depende do resultado primário do ano (ou da projeção oficial)."])
     excesso = max(0.0, r01.valor - r01.extras["superior"])
     fator = _preferida(ctx.base, "fator_ipca_desde_jan2023")
     base_nominal = p.get("limite_nominal_base_bi")
@@ -381,32 +384,91 @@ def r08_regra_de_ouro(regra, ctx: Contexto) -> Resultado:
     return res
 
 
+def _datas_completas(ctx: Contexto, poder: str) -> list[dt.date]:
+    """Datas (mais recente primeiro) em que o Poder tem DTP publicada COMPLETA: nº de blocos
+    (instituições) igual ao máximo já visto no exercício. Sem contagem, todas as datas."""
+    datas = sorted({o.data_referencia for o in ctx.base.serie(f"dtp_{poder}_bi")}, reverse=True)
+    blocos = {o.data_referencia: o.valor for o in ctx.base.serie(f"n_blocos_dtp_{poder}")}
+    if not blocos:
+        return datas
+    maximo = max(blocos.values())
+    return [d for d in datas if blocos.get(d, 0) >= maximo]
+
+
+def _pessoal_em(ctx: Contexto, poder: str, data: dt.date) -> tuple[Observacao | None, Observacao | None]:
+    def em(ind):
+        s = [o for o in ctx.base.serie(ind) if o.data_referencia == data]
+        return s[-1] if s else None
+    return em(f"dtp_{poder}_bi"), em(f"limite_dtp_{poder}_bi")
+
+
+def _pessoal_completo(ctx: Contexto, poder: str) -> tuple[Observacao | None, Observacao | None, str | None]:
+    """DTP e limite oficial do Poder no período mais recente completo. Evita usar um
+    quadrimestre em que só parte dos tribunais enviou o RGF."""
+    todas = sorted({o.data_referencia for o in ctx.base.serie(f"dtp_{poder}_bi")}, reverse=True)
+    completas = _datas_completas(ctx, poder)
+    if not todas:
+        return None, None, None
+    d = (completas or todas)[0]
+    nota = None
+    if d != todas[0]:
+        blocos = {o.data_referencia: o.valor for o in ctx.base.serie(f"n_blocos_dtp_{poder}")}
+        nota = (f"Período de {todas[0]:%m/%Y} incompleto ({blocos.get(todas[0], 0):.0f} de "
+                f"{max(blocos.values()):.0f} instituições); usado {d:%m/%Y}.")
+    dtp, lim = _pessoal_em(ctx, poder, d)
+    return dtp, lim, nota
+
+
 def _somar_poderes(ctx: Contexto, prefixo: str) -> None:
-    """Sem `{prefixo}_total_bi`, soma os Poderes do R10 (todos precisam estar presentes)."""
+    """Sem `{prefixo}_total_bi`, soma os Poderes do R10 na data mais recente em que TODOS
+    estão completos (não mistura quadrimestres)."""
     if _preferida(ctx.base, f"{prefixo}_total_bi"):
         return
     poderes = list((ctx.parametros.regra("R10").get("limites") or {}))
-    obs = [_preferida(ctx.base, f"{prefixo}_{p}_bi") for p in poderes]
-    if poderes and all(obs):
+    if not poderes:
+        return
+    comuns = set(_datas_completas(ctx, poderes[0]))
+    for p in poderes[1:]:
+        comuns &= set(_datas_completas(ctx, p))
+    if not comuns:
+        return
+    d = max(comuns)
+    obs = [_pessoal_em(ctx, p, d)[0] for p in poderes]
+    if all(obs):
         ctx.base.adicionar([Observacao(
-            indicador=f"{prefixo}_total_bi", valor=sum(o.valor for o in obs),
-            data_referencia=min(o.data_referencia for o in obs),
+            indicador=f"{prefixo}_total_bi", valor=sum(o.valor for o in obs), data_referencia=d,
             data_coleta=max((o.data_coleta for o in obs if o.data_coleta), default=None),
             fonte="soma dos Poderes (RGF Anexo 1)", tipo=obs[0].tipo)])
 
 
+def _rcl_em(ctx: Contexto, data: dt.date) -> Observacao | None:
+    """RCL do mesmo período da despesa (ou a mais recente anterior a ele)."""
+    anteriores = [o for o in ctx.base.serie("rcl_bi") if o.data_referencia <= data]
+    return anteriores[-1] if anteriores else _preferida(ctx.base, "rcl_bi")
+
+
 def r09_pessoal_total(regra, ctx):
     _somar_poderes(ctx, "dtp")
-    return _razao_sobre(regra, ctx, "dtp_total_bi", "rcl_bi", regra.get("limite"),
-                        "maximo", "percentual")
+    dtp = _preferida(ctx.base, "dtp_total_bi")
+    if dtp is None:
+        return _razao_sobre(regra, ctx, "dtp_total_bi", "rcl_bi", regra.get("limite"),
+                            "maximo", "percentual")
+    rcl = _rcl_em(ctx, dtp.data_referencia)
+    if rcl is None:
+        return _sem_dados(regra, ["rcl_bi"], unidade="fracao", limite=regra.get("limite"))
+    limite = regra.get("limite")
+    razao = dtp.valor / rcl.valor
+    res = _novo(regra, st.percentual(razao / limite, ctx.niveis), valor=razao, unidade="fracao",
+                limite=limite, tipo_limite="maximo", folga=limite - razao, **_datas(dtp, rcl))
+    res.extras["uso_do_limite"] = razao / limite
+    return res
 
 
 def r10_pessoal_poder(regra, ctx: Contexto) -> Resultado:
     detalhes = []
-    rcl = _preferida(ctx.base, "rcl_bi")
     for poder, limite in (regra.get("limites") or {}).items():
-        dtp = _preferida(ctx.base, f"dtp_{poder}_bi")
-        oficial = _preferida(ctx.base, f"limite_dtp_{poder}_bi")
+        dtp, oficial, nota_periodo = _pessoal_completo(ctx, poder)
+        rcl = _rcl_em(ctx, dtp.data_referencia) if dtp else None
         if dtp and oficial and rcl:
             # limite oficial do RGF (soma dos blocos do Poder), convertido em fração da RCL
             limite_rcl = oficial.valor / rcl.valor
@@ -416,6 +478,8 @@ def r10_pessoal_poder(regra, ctx: Contexto) -> Resultado:
                       **_datas(dtp, oficial, rcl))
             d.extras["uso_do_limite"] = dtp.valor / oficial.valor
             d.notas.append("Limite oficial informado no RGF.")
+            if nota_periodo:
+                d.notas.append(nota_periodo)
         else:
             d = _razao_sobre(regra, ctx, f"dtp_{poder}_bi", "rcl_bi", limite, "maximo", "percentual")
         d.nome = poder
@@ -499,13 +563,17 @@ def _minimo_aplicado(regra, ctx: Contexto, aplicado: str, minimo: str, denominad
         return _razao_sobre(regra, ctx, aplicado, denominador, piso, "minimo", "minimo")
     base_calc = mi.valor / piso
     pct = ap.valor / base_calc
-    res = _novo(regra, st.minimo(pct, piso), valor=pct, unidade="fracao", limite=piso,
-                tipo_limite="minimo", folga=pct - piso, **_datas(ap, mi))
+    fechado = ap.data_referencia >= dt.date(ctx.exercicio, 12, 1)
+    res = _novo(regra, st.minimo(pct, piso) if fechado else st.EM_APURACAO, valor=pct,
+                unidade="fracao", limite=piso, tipo_limite="minimo",
+                folga=pct - piso if fechado else None,
+                **{**_datas(ap, mi), "base_apuracao": "realizado" if fechado else "parcial"})
     res.extras.update({"aplicado_bi": ap.valor, "minimo_bi": mi.valor, "uso_do_minimo": ap.valor / mi.valor})
     res.notas.append(f"Aplicado R$ {_br(ap.valor)} bi; mínimo R$ {_br(mi.valor)} bi "
                      f"({_br(ap.valor / mi.valor * 100)}% do mínimo).")
-    if ap.data_referencia < dt.date(ctx.exercicio, 12, 1):
-        res.notas.append("Apuração até o bimestre; o mínimo é anual.")
+    if not fechado:
+        res.notas.append(f"Aplicado até {ap.data_referencia:%m/%Y} contra o mínimo anual; "
+                         "o cumprimento só se apura com o 6º bimestre.")
     return res
 
 

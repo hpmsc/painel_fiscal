@@ -186,10 +186,45 @@ def test_r09_soma_os_poderes_quando_falta_total(params, base):
 def test_minimos_com_valor_minimo_publicado(params, base):
     # RREO Anexo 14 da União, 2025: saúde 234,55 aplicado vs. 227,66 mínimo; MDE 129,89 vs. 122,10
     b = base(2026, obs("asps_bi", 234.55, "2026-12-31"), obs("asps_minimo_bi", 227.66, "2026-12-31"),
-             obs("mde_bi", 110.0), obs("mde_minimo_bi", 122.10))
+             obs("mde_bi", 110.0, "2026-12-31"), obs("mde_minimo_bi", 122.10, "2026-12-31"))
     res = por_id(params, 2026, b)
     assert res["R16"].status == st.CUMPRE
     assert res["R16"].valor == pytest.approx(0.15 * 234.55 / 227.66)      # 15,45% da RCL
     assert res["R16"].extras["uso_do_minimo"] == pytest.approx(1.0303, abs=1e-4)
     assert res["R17"].status == st.DESCUMPRE
-    assert any("até o bimestre" in n for n in res["R17"].notas)
+
+
+def test_minimos_no_meio_do_ano_ficam_em_apuracao(params, base):
+    # RREO 2026, 3º bimestre (dado real): saúde 116,93 aplicado vs. mínimo anual 133,68
+    b = base(2026, obs("asps_bi", 116.93, "2026-06-30"), obs("asps_minimo_bi", 133.68, "2026-06-30"))
+    r = por_id(params, 2026, b)["R16"]
+    assert r.status == st.EM_APURACAO and r.folga is None
+    assert any("6º bimestre" in n for n in r.notas)
+
+
+def test_pessoal_ignora_quadrimestre_incompleto(params, base):
+    # RGF 2026 (dado real): Judiciário com 65 blocos no 1º quad. e só parte no 2º
+    b = base(2026, obs("rcl_bi", 1561.14, "2026-04-30"),
+             obs("dtp_judiciario_bi", 42.5, "2026-04-30"), obs("limite_dtp_judiciario_bi", 99.9, "2026-04-30"),
+             obs("n_blocos_dtp_judiciario", 65, "2026-04-30"),
+             obs("dtp_judiciario_bi", 3.78, "2026-08-31"), obs("limite_dtp_judiciario_bi", 8.67, "2026-08-31"),
+             obs("n_blocos_dtp_judiciario", 9, "2026-08-31"))
+    d = {x.nome: x for x in por_id(params, 2026, b)["R10"].detalhes}["judiciario"]
+    assert d.extras["uso_do_limite"] == pytest.approx(42.5 / 99.9)
+    assert d.data_referencia.isoformat() == "2026-04-30"
+    assert any("incompleto" in n for n in d.notas)
+    # quando o 2º quadrimestre fica completo, passa a ser usado
+    b.adicionar([obs("dtp_judiciario_bi", 44.0, "2026-08-31"), obs("limite_dtp_judiciario_bi", 101.0, "2026-08-31"),
+                 obs("n_blocos_dtp_judiciario", 65, "2026-08-31")])
+    d = {x.nome: x for x in por_id(params, 2026, b)["R10"].detalhes}["judiciario"]
+    assert d.extras["uso_do_limite"] == pytest.approx(44.0 / 101.0)
+
+
+def test_r09_nao_mistura_quadrimestres(params, base):
+    b = base(2026, obs("rcl_bi", 1000, "2026-04-30"), obs("rcl_bi", 1050, "2026-08-31"))
+    for p, v in (("executivo", 300), ("legislativo_incl_tcu", 12), ("judiciario", 42), ("mpu", 7)):
+        b.adicionar([obs(f"dtp_{p}_bi", v, "2026-04-30")])
+    b.adicionar([obs("dtp_executivo_bi", 310, "2026-08-31")])      # só o Executivo publicou o 2º quad.
+    r = por_id(params, 2026, b)["R09"]
+    assert r.valor == pytest.approx(361 / 1000)
+    assert r.data_referencia.isoformat() == "2026-04-30"

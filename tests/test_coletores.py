@@ -123,3 +123,12 @@ def test_siop_investimentos_e_discricionarias(tmp_path):
     assert obs["despesas_discricionarias_bi"].valor == pytest.approx(180)  # 55+120+5
     assert obs["despesas_discricionarias_bi"].tipo == "projecao"
     assert obs["despesas_discricionarias_empenhadas_bi"].valor == pytest.approx(131)
+
+
+def test_siconfi_conta_blocos():
+    itens = [{"cod_conta": "DespesaComPessoalTotal", "coluna": "Valor", "valor": 1e9},
+             {"cod_conta": "DespesaComPessoalTotal", "coluna": "Valor", "valor": 2e9},
+             {"cod_conta": "DespesaComPessoalTotal", "coluna": "% sobre a RCL", "valor": 0.1}]
+    mapa = [{"indicador": "n_blocos_dtp_mpu", "cod_conta": "DespesaComPessoalTotal", "coluna": "^valor$", "contar": True}]
+    obs = siconfi.extrair(itens, mapa, dt.date(2026, 4, 30), dt.date.today(), "x", periodo=1)
+    assert obs[0].valor == 2

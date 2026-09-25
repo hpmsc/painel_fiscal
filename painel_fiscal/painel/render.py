@@ -66,7 +66,9 @@ def formatar_limite(r: Resultado) -> str:
         sup = f"R$ {_num(e['superior'])} bi" if e.get("superior") is not None else "sem teto"
         return f"R$ {_num(e['inferior'])} bi a {sup}"
     if r.limite is None:
-        return "a confirmar" if r.status == st.PENDENTE else "sem limite legal"
+        if r.status == st.PENDENTE:
+            return "a confirmar"
+        return "—" if r.status == st.SEM_DADOS else "sem limite legal"
     prefixo = {"minimo": "≥ ", "maximo": "≤ "}.get(r.tipo_limite or "", "")
     return prefixo + formatar(r.limite, r.unidade if r.unidade != "uso_limite" else "fracao")
 
@@ -276,8 +278,6 @@ def _pendencias(parametros: Parametros, exercicio: int, resultados: list[Resulta
     if faltando:
         itens.append({"tipo": "Identificar", "regra": "Fontes",
                       "texto": "Código SGS ausente: " + ", ".join(faltando) + "."})
-    itens.append({"tipo": "Identificar", "regra": "R16/R17",
-                  "texto": "Nome dos anexos de saúde (ASPS) e educação (MDE) do RREO da União no SICONFI."})
     return itens
 
 

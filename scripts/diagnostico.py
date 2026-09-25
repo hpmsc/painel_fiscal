@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import traceback
 from collections import Counter
@@ -35,12 +36,16 @@ BUSCAS_SGS = [
     "dívida bruta do governo geral",
     "dívida líquida do setor público",
 ]
+CANDIDATAS_PRIMARIO = [4639, 5783, 4640]
+ANEXOS_RELATORIOS = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/anexos-relatorios"
+CONTAS_CHAVE_RGF1 = {"ReceitaCorrenteLiquidaLimiteLegal", "DespesaComPessoalTotal",
+                     "LimiteMaximoDespesaComPessoalTotal"}
 ANEXOS = {
     "rgf": ["RGF-Anexo 01", "RGF-Anexo 02", "RGF-Anexo 03", "RGF-Anexo 04"],
     "rreo": ["RREO-Anexo 08", "RREO-Anexo 09", "RREO-Anexo 12"],
 }
 PODERES = ["E", "L", "J", "M"]
-MAX_LINHAS_CONTAS = 400
+MAX_LINHAS_CONTAS = 250
 
 
 class Relatorio:
@@ -78,7 +83,12 @@ def sgs(rel: Relatorio, params: config.Parametros) -> None:
                               if "bcdata.sgs." in u})
             rel(f"| {p.get('name')} | {p.get('title')} | {', '.join(codigos) or '—'} |")
         rel()
-    rel("### Últimos valores das séries do YAML\n")
+    rel("### Candidatas ao primário do Governo Central (últimos 13)\n")
+    for codigo in CANDIDATAS_PRIMARIO:
+        dados = obter_json(SGS_ULTIMOS.format(codigo=codigo, n=13), {"formato": "json"})
+        rel.gravar_json(f"sgs_{codigo}", dados)
+        rel(f"- {codigo}: {dados}")
+    rel("\n### Últimos valores das séries do YAML\n")
     for indicador, codigo in params.fontes["bcb_sgs"]["series"].items():
         if codigo is None:
             rel(f"- `{indicador}`: sem código no YAML")
@@ -98,18 +108,34 @@ def entes(rel: Relatorio) -> None:
     rel("```\n" + json.dumps(uniao[:5], ensure_ascii=False, indent=1) + "\n```")
 
 
+def _bi(v) -> str:
+    try:
+        return f"{float(v) / 1e9:,.2f}"
+    except (TypeError, ValueError):
+        return str(v)
+
+
 def _resumo_contas(rel: Relatorio, itens: list[dict]) -> None:
     rel(f"{len(itens)} linhas. Colunas: " + ", ".join(
         f"`{c}` ({n})" for c, n in Counter(i.get("coluna") for i in itens).most_common()))
-    rel("\n| cod_conta | conta | coluna | valor (R$ bi) |\n|---|---|---|---|")
-    for it in itens[:MAX_LINHAS_CONTAS]:
-        try:
-            v = f"{float(it.get('valor')) / 1e9:,.2f}"
-        except (TypeError, ValueError):
-            v = str(it.get("valor"))
-        rel(f"| {it.get('cod_conta')} | {it.get('conta')} | {it.get('coluna')} | {v} |")
-    if len(itens) > MAX_LINHAS_CONTAS:
-        rel(f"\n… {len(itens) - MAX_LINHAS_CONTAS} linhas omitidas (ver JSON no artefato).")
+    if not itens:
+        return
+    rel("\nCampos: " + ", ".join(f"`{k}`" for k in itens[0]))
+    rel("\nBlocos (instituicao · rotulo → linhas):\n")
+    for (inst, rot), n in Counter((i.get("instituicao"), i.get("rotulo")) for i in itens).most_common(80):
+        rel(f"- {inst} · {rot} → {n}")
+    rel("\n| cod_conta | conta | colunas |\n|---|---|---|")
+    distintas: dict[tuple, set] = {}
+    for it in itens:
+        distintas.setdefault((it.get("cod_conta"), it.get("conta")), set()).add(it.get("coluna"))
+    for (cod, conta), cols in list(distintas.items())[:MAX_LINHAS_CONTAS]:
+        rel(f"| {cod} | {conta} | {'; '.join(sorted(map(str, cols)))} |")
+    chave = [i for i in itens if i.get("cod_conta") in CONTAS_CHAVE_RGF1 and
+             str(i.get("coluna", "")).lower() == "valor"]
+    if chave:
+        rel("\n| instituicao | rotulo | cod_conta | valor (R$ bi) |\n|---|---|---|---|")
+        for it in chave:
+            rel(f"| {it.get('instituicao')} | {it.get('rotulo')} | {it.get('cod_conta')} | {_bi(it.get('valor'))} |")
 
 
 def siconfi_demonstrativos(rel: Relatorio, exercicio: int, id_ente: int, mapa: dict) -> None:
@@ -151,6 +177,32 @@ def _testar_mapeamento(rel: Relatorio, itens: list[dict], mapeamento: list[dict]
             rel(f"- `{m['indicador']}`: **ambíguo** — {e}")
 
 
+def anexos_disponiveis(rel: Relatorio, exercicio: int, id_ente: int) -> None:
+    resp = obter_json(ANEXOS_RELATORIOS)
+    itens = resp.get("items", [])
+    rel.gravar_json("siconfi_anexos_relatorios", itens)
+    uniao = [a for a in itens if str(a.get("esfera", "")).upper() in ("U", "UNIÃO", "UNIAO")] or itens
+    rel(f"{len(itens)} anexos no catálogo; {len(uniao)} para a esfera U:\n")
+    for a in uniao:
+        rel(f"- {a}")
+    alvo = re.compile(r"(0?8|12|sa[uú]de|educa|mde)", re.I)
+    nomes = sorted({a.get("anexo") for a in uniao if a.get("demonstrativo", "").upper().startswith("RREO")
+                    and alvo.search(str(a.get("anexo")))})
+    for anexo in nomes:
+        if anexo in ANEXOS["rreo"]:
+            continue
+        rel(f"\n### RREO {exercicio} p6 — {anexo}\n")
+        params = {"an_exercicio": exercicio, "nr_periodo": 6, "co_tipo_demonstrativo": "RREO",
+                  "no_anexo": anexo, "id_ente": id_ente}
+        try:
+            its = siconfi.buscar_itens("rreo", params)
+        except Exception as e:
+            rel(f"**ERRO:** `{type(e).__name__}: {e}`")
+            continue
+        rel.gravar_json(f"siconfi_rreo_{anexo.replace(' ', '_')}", its)
+        _resumo_contas(rel, its)
+
+
 def sidra(rel: Relatorio) -> None:
     for nome, tabela, variavel in [("IPCA 12 meses", 1737, 2265), ("IPCA mensal", 1737, 63),
                                    ("PIB corrente trimestral", 1846, 585)]:
@@ -186,6 +238,8 @@ def main() -> int:
     rel.secao("SICONFI — entes", lambda: entes(rel))
     rel.secao(f"SICONFI — demonstrativos (id_ente={id_ente})",
               lambda: siconfi_demonstrativos(rel, args.exercicio, id_ente, mapa))
+    rel.secao("SICONFI — anexos disponíveis e RREO de saúde/educação",
+              lambda: anexos_disponiveis(rel, args.exercicio, id_ente))
     rel.secao("IBGE — SIDRA", lambda: sidra(rel))
     rel.secao("STN — RTN (CKAN)", lambda: rtn(rel))
 

@@ -181,3 +181,12 @@ def test_r09_soma_os_poderes_quando_falta_total(params, base):
     assert r.valor == pytest.approx(0.369)
     b2 = base(2026, obs("rcl_bi", 1000), obs("dtp_executivo_bi", 300))   # Poder faltando: não soma
     assert por_id(params, 2026, b2)["R09"].status == st.SEM_DADOS
+
+
+def test_minimos_usam_percentual_publicado(params, base):
+    b = base(2026, obs("asps_pct_aplicado", 0.152, "2026-12-31"), obs("asps_bi", 230),
+             obs("mde_pct_aplicado", 0.175, "2026-08-31"))
+    res = por_id(params, 2026, b)
+    assert res["R16"].status == st.CUMPRE and res["R16"].valor == 0.152
+    assert res["R17"].status == st.DESCUMPRE
+    assert any("até o bimestre" in n for n in res["R17"].notas)

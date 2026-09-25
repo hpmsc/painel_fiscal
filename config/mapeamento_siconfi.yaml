@@ -30,5 +30,11 @@ rgf_pessoal:
 rreo:
   - {indicador: receitas_operacoes_credito_bi, anexo: "RREO-Anexo 09", cod_conta: ReceitasDeOperacoesDeCreditoRegraDeOuro, coluna: "^receitas realizadas$"}
   - {indicador: despesas_capital_bi,           anexo: "RREO-Anexo 09", cod_conta: DespesaDeCapitalLiquida,                 coluna: "^despesas empenhadas$"}
-  # ⚠ Saúde e educação: a consulta com "RREO-Anexo 08" e "RREO-Anexo 12" voltou vazia para
-  # a União; o nome do anexo está sendo levantado no catálogo anexos-relatorios.
+  # Saúde e educação: a União não publica os Anexos 8 e 12 no SICONFI; os valores estão no
+  # Anexo 14 (demonstrativo simplificado). "% Aplicado" vem em pontos percentuais → escala 0,01.
+  - {indicador: asps_bi,             anexo: "RREO-Anexo 14", cod_conta: AplicacaoTotalDasDespesasComAcoesEServicosPublicosDeSaude, coluna: "^valor apurado at[eé] o bimestre$"}
+  - {indicador: asps_pct_aplicado,   anexo: "RREO-Anexo 14", cod_conta: AplicacaoTotalDasDespesasComAcoesEServicosPublicosDeSaude, coluna: "^% aplicado at[eé] o bimestre$", escala: 0.01}
+  - {indicador: mde_bi,              anexo: "RREO-Anexo 14", cod_conta: MinimoAnualDasReceitasDeImpostosNaManutencaoEDesenvolvimentoDoEnsinoDemonstrativoSimplificado, coluna: "^valor apurado at[eé] o bimestre$"}
+  - {indicador: mde_pct_aplicado,    anexo: "RREO-Anexo 14", cod_conta: MinimoAnualDasReceitasDeImpostosNaManutencaoEDesenvolvimentoDoEnsinoDemonstrativoSimplificado, coluna: "^% aplicado at[eé] o bimestre$", escala: 0.01}
+  # Primário acima da linha (OFSS, referência para a discrepância com o BCB)
+  - {indicador: primario_gc_acima_linha_bi, anexo: "RREO-Anexo 14", cod_conta: ResultadoPrimarioDemonstrativoSimplificado, coluna: "^at[eé] o bimestre$"}

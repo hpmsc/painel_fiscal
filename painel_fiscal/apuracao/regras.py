@@ -489,13 +489,29 @@ def r15_trajetoria_divida(regra, ctx: Contexto) -> Resultado:
     return res
 
 
+def _minimo_aplicado(regra, ctx: Contexto, pct: str, numerador: str, denominador: str) -> Resultado:
+    """Mínimos constitucionais: usa o % aplicado publicado no RREO (Anexo 14 da União);
+    sem ele, calcula numerador ÷ denominador."""
+    o = _preferida(ctx.base, pct)
+    if o is None:
+        return _razao_sobre(regra, ctx, numerador, denominador, regra.get("limite"), "minimo", "minimo")
+    piso = regra.get("limite")
+    res = _novo(regra, st.minimo(o.valor, piso), valor=o.valor, unidade="fracao", limite=piso,
+                tipo_limite="minimo", folga=o.valor - piso, **_datas(o))
+    valor = _preferida(ctx.base, numerador)
+    if valor is not None:
+        res.notas.append(f"Aplicado: R$ {valor.valor:,.1f} bi (% publicado no RREO).".replace(",", "."))
+    if o.data_referencia < dt.date(ctx.exercicio, 12, 1):
+        res.notas.append("Apuração até o bimestre; o mínimo é anual.")
+    return res
+
+
 def r16_saude(regra, ctx):
-    return _razao_sobre(regra, ctx, "asps_bi", "rcl_bi", regra.get("limite"), "minimo", "minimo")
+    return _minimo_aplicado(regra, ctx, "asps_pct_aplicado", "asps_bi", "rcl_bi")
 
 
 def r17_educacao(regra, ctx):
-    return _razao_sobre(regra, ctx, "mde_bi", "receita_liquida_impostos_bi",
-                        regra.get("limite"), "minimo", "minimo")
+    return _minimo_aplicado(regra, ctx, "mde_pct_aplicado", "mde_bi", "receita_liquida_impostos_bi")
 
 
 # Ordem importa: R06 usa R01; R02 pode usar R03; R11 usa R09/R10.

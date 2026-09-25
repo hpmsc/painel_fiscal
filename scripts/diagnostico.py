@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 import traceback
 from collections import Counter
@@ -179,6 +178,11 @@ def _testar_mapeamento(rel: Relatorio, itens: list[dict], mapeamento: list[dict]
             rel(f"- `{m['indicador']}`: **ambíguo** — {e}")
 
 
+def mapa_rreo(rel: Relatorio) -> list[dict]:
+    with open(config.RAIZ / "config" / "mapeamento_siconfi.yaml", encoding="utf-8") as f:
+        return yaml.safe_load(f).get("rreo", [])
+
+
 def anexos_disponiveis(rel: Relatorio, exercicio: int, id_ente: int) -> None:
     """Consulta o RREO da União sem `no_anexo` para listar os anexos que existem de fato
     (o catálogo anexos-relatorios costuma estourar o tempo) e resume os de saúde/educação."""
@@ -190,13 +194,19 @@ def anexos_disponiveis(rel: Relatorio, exercicio: int, id_ente: int) -> None:
     rel(f"{len(itens)} linhas no RREO {exercicio} p6. Anexos:\n")
     for anexo, n in sorted(contagem.items(), key=lambda x: str(x[0])):
         rel(f"- `{anexo}` → {n}")
-    alvo = re.compile(r"sa[uú]de|educa|mde|asps|ensino", re.I)
-    for anexo in sorted(contagem, key=str):
-        linhas = [i for i in itens if i.get("anexo") == anexo]
-        if not any(alvo.search(str(i.get("conta", ""))) for i in linhas):
-            continue
-        rel(f"\n### RREO {exercicio} p6 — {anexo} (contas com saúde/educação)\n")
-        _resumo_contas(rel, linhas)
+    anexo14 = [i for i in itens if i.get("anexo") == "RREO-Anexo 14"]
+    rel("\n### RREO-Anexo 14 — linhas mapeadas (valores brutos)\n")
+    rel("| cod_conta | coluna | valor bruto |\n|---|---|---|")
+    for m in mapa_rreo(rel):
+        for it in anexo14:
+            if it.get("cod_conta") == m.get("cod_conta"):
+                rel(f"| {it.get('cod_conta')} | {it.get('coluna')} | {it.get('valor')} |")
+    import datetime as dt
+    obs = siconfi.extrair(anexo14, [m for m in mapa_rreo(rel) if m.get("anexo") == "RREO-Anexo 14"],
+                          dt.date.today(), dt.date.today(), "diag", 6)
+    rel("\n**Teste do mapeamento (Anexo 14):**\n")
+    for o in obs:
+        rel(f"- `{o.indicador}`: {o.valor:,.4f}")
 
 
 def sidra(rel: Relatorio) -> None:

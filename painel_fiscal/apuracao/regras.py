@@ -384,9 +384,37 @@ def r04_gatilhos(regra, ctx: Contexto) -> Resultado:
 
 # ---------------------------------------------------------------- demais regras
 
-def r05_piso_investimentos(regra, ctx):
-    return _razao_sobre(regra, ctx, "investimentos_loa_bi", "pib_estimado_ploa_bi",
-                        regra.get("limite"), "minimo", "minimo", ("projecao", "realizado"))
+def r05_piso_investimentos(regra, ctx: Contexto) -> Resultado:
+    """Piso de investimentos, verificado no PLOA: investimentos do OFSS (SIOP, coluna PLOA)
+    mais, se `incluir_estatais`, o Orçamento de Investimento das estatais, sobre o PIB do PLOA."""
+    ordem = ("projecao", "realizado")
+    piso = regra.get("limite")
+    ofss = _preferida(ctx.base, "investimentos_ploa_bi", ordem)
+    usado_loa = False
+    if ofss is None:                       # sem a coluna PLOA, cai para a dotação da LOA
+        ofss = _preferida(ctx.base, "investimentos_loa_bi", ordem)
+        usado_loa = ofss is not None
+    pib = _preferida(ctx.base, "pib_estimado_ploa_bi", ordem)
+    estatais = (_preferida(ctx.base, "investimentos_estatais_ploa_bi", ordem)
+                if (regra.get("parametros") or {}).get("incluir_estatais") else None)
+    falta = _faltantes(investimentos_ploa_bi=ofss, pib_estimado_ploa_bi=pib)
+    if falta:
+        return _sem_dados(regra, falta, unidade="fracao", limite=piso, tipo_limite="minimo")
+    total = ofss.valor + (estatais.valor if estatais else 0.0)
+    razao = total / pib.valor
+    res = _novo(regra, st.minimo(razao, piso), valor=razao, unidade="fracao", limite=piso,
+                tipo_limite="minimo", folga=razao - piso, **_datas(ofss, pib, estatais))
+    res.fontes = list(dict.fromkeys([ofss.fonte, pib.fonte] + ([estatais.fonte] if estatais else [])))
+    res.extras.update({"ofss_bi": ofss.valor, "estatais_bi": estatais.valor if estatais else None,
+                       "pib_bi": pib.valor, "piso_bi": piso * pib.valor})
+    partes = f"OFSS {_rs(ofss.valor)}" + (f" + estatais {_rs(estatais.valor)}" if estatais else "")
+    res.notas.append(f"{partes} = {_rs(total)}; piso {_rs(piso * pib.valor)} "
+                     f"(0,6% do PIB do PLOA, {_rs(pib.valor)}).")
+    if estatais:
+        res.notas.append(f"Só OFSS: {ofss.valor / pib.valor * 100:.2f}% do PIB.".replace(".", ",", 1))
+    if usado_loa:
+        res.notas.append("Sem o valor do PLOA: usada a dotação da LOA.")
+    return res
 
 
 def r07_contingenciamento(regra, ctx):

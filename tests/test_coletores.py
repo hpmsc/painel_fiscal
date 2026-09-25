@@ -120,6 +120,7 @@ def test_siop_investimentos_e_discricionarias(tmp_path):
     cfg = {"rp_primarias": [1, 2, 3, 6, 7, 8, 9], "rp_discricionarias": [2, 3, 6, 7, 8, 9]}
     obs = {o.indicador: o for o in siop.converter(siop.ler_csv(csv_), 2025, cfg, dt.date.today())}
     assert obs["investimentos_loa_bi"].valor == pytest.approx(65)          # 10+50+5, sem RP 0
+    assert obs["investimentos_ploa_bi"].valor == 0                          # coluna ploa zerada no teste
     assert obs["despesas_discricionarias_bi"].valor == pytest.approx(180)  # 55+120+5
     assert obs["despesas_discricionarias_bi"].tipo == "projecao"
     assert obs["despesas_discricionarias_empenhadas_bi"].valor == pytest.approx(131)

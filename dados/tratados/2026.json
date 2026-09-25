@@ -790,6 +790,15 @@
       "fonte": "siconfi_rgf_rgf-anexo_01",
       "data_coleta": "2026-09-25",
       "tipo": "realizado"
+    },
+    {
+      "indicador": "investimentos_ploa_bi",
+      "valor": 55.310428721,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-09-25",
+      "tipo": "projecao",
+      "nota": "GND 4, despesas primárias, projeto de lei (PLOA)"
     }
   ]
 }

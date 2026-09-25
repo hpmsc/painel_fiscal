@@ -253,10 +253,12 @@ fontes:
   siop:
     acesso: "dados abertos do SIOP via pacote R orcamentoBR (sem credencial); webservice SOAP exige credencial"
     script: scripts/coleta_siop.R
-    # Classificação de Resultado Primário (RP): 0 financeira, 1 obrigatória, 2 discricionária,
-    # 3 PAC, 6–9 emendas (individuais, bancada, comissão, relator). ⚠ conferir a lista vigente.
+    # Classificação de Resultado Primário (RP), confirmada nas descrições do SIOP (2025):
+    # 0 financeira, 1 obrigatória, 2 discricionária, 3 PAC, 6 emendas individuais,
+    # 7 emendas de bancada, 8 emendas de comissão (9, emendas de relator, não ocorre em 2025).
+    # 2025: investimentos (GND 4, primárias, LOA) R$ 80,3 bi; discricionárias (LOA + créditos)
+    # R$ 229,8 bi.
     rp_primarias: [1, 2, 3, 6, 7, 8, 9]
     rp_discricionarias: [2, 3, 6, 7, 8, 9]
     coluna_investimentos: loa        # R05: dotação inicial da LOA
-    verificar: true
   benchmarks: [ifi_raf, prisma_fiscal, focus_bcb]

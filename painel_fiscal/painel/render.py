@@ -110,6 +110,8 @@ def grafico_meta(r01: Resultado) -> str:
     pontos = []
     if r01.valor is not None and r01.base_apuracao != "parcial":
         rot = "Resultado ajustado (projeção)" if r01.base_apuracao == "projecao" else "Resultado ajustado"
+        if e.get("antes_contingenciamento") is not None:
+            rot = "Resultado ajustado (projeção, com contingenciamento)"
         pontos.append(("ajustado", rot, r01.valor, "var(--serie-1)"))
     if e.get("realizado_acumulado") is not None:
         pontos.append(("acumulado", f"Realizado acumulado até {data_br(e.get('realizado_data'))}",

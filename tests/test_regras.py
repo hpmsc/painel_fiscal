@@ -228,3 +228,18 @@ def test_r09_nao_mistura_quadrimestres(params, base):
     r = por_id(params, 2026, b)["R09"]
     assert r.valor == pytest.approx(361 / 1000)
     assert r.data_referencia.isoformat() == "2026-04-30"
+
+
+def test_r01_relatorio_bimestral_total_de_deducoes_e_contingenciamento(params, base):
+    # RARDP 4º bimestre/2026: −80,9 projetado, deduções 67,3 → −13,6; contingenciamento 13,6 → piso
+    b = base(2026,
+             obs("primario_gc_abaixo_linha_bi", -80.9, "2026-12-31", "projecao"),
+             obs("deducoes_meta_total_bi", 67.3, "2026-12-31", "projecao"),
+             obs("contingenciamento_bi", 13.6, "2026-12-31", "projecao"),
+             obs("despesas_fundo_social_bi", 99.0, "2026-12-31", "projecao"))   # ignorado: total prevalece
+    r = por_id(params, 2026, b)["R01"]
+    assert r.extras["total_deducoes"] == pytest.approx(67.3)
+    assert r.extras["antes_contingenciamento"] == pytest.approx(-13.6)
+    assert r.valor == pytest.approx(0.0, abs=1e-9)
+    assert r.status == st.CUMPRE
+    assert any("antes do contingenciamento" in n for n in r.notas)

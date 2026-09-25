@@ -37,7 +37,6 @@ BUSCAS_SGS = [
     "dívida líquida do setor público",
 ]
 CANDIDATAS_PRIMARIO = [4639, 5783, 4640]
-ANEXOS_RELATORIOS = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/anexos-relatorios"
 CONTAS_CHAVE_RGF1 = {"ReceitaCorrenteLiquidaLimiteLegal", "DespesaComPessoalTotal",
                      "LimiteMaximoDespesaComPessoalTotal"}
 ANEXOS = {
@@ -159,49 +158,45 @@ def siconfi_demonstrativos(rel: Relatorio, exercicio: int, id_ente: int, mapa: d
                 rel.gravar_json(f"siconfi_{dem}_{anexo.replace(' ', '_')}_{poder or 'todos'}", itens)
                 _resumo_contas(rel, itens)
                 mapeamento = [m for m in mapa.get(dem, []) if m.get("anexo") == anexo]
-                if poder and poder != "E":
-                    mapeamento = [{**m, "indicador": f"{m['indicador']} (poder {poder})"}
-                                  for m in mapeamento if m["indicador"] == "dtp_total_bi"]
-                _testar_mapeamento(rel, itens, mapeamento)
+                if anexo == "RGF-Anexo 01":
+                    nome = mapa.get("rgf_por_poder", {}).get(poder, poder)
+                    mapeamento = [{**m, "indicador": m["indicador"].format(poder=nome)}
+                                  for m in mapa.get("rgf_pessoal", [])]
+                _testar_mapeamento(rel, itens, mapeamento, periodos[dem])
 
 
-def _testar_mapeamento(rel: Relatorio, itens: list[dict], mapeamento: list[dict]) -> None:
+def _testar_mapeamento(rel: Relatorio, itens: list[dict], mapeamento: list[dict],
+                       periodo: int | None = None) -> None:
     if not mapeamento:
         return
     rel("\n**Teste do mapeamento atual:**\n")
     import datetime as dt
     for m in mapeamento:
         try:
-            obs = siconfi.extrair(itens, [m], dt.date.today(), dt.date.today(), "diag")
+            obs = siconfi.extrair(itens, [m], dt.date.today(), dt.date.today(), "diag", periodo)
             rel(f"- `{m['indicador']}`: " + (f"OK → {obs[0].valor:,.2f} bi" if obs else "**nenhuma linha casou**"))
         except ValueError as e:
             rel(f"- `{m['indicador']}`: **ambíguo** — {e}")
 
 
 def anexos_disponiveis(rel: Relatorio, exercicio: int, id_ente: int) -> None:
-    resp = obter_json(ANEXOS_RELATORIOS, timeout=300)
-    itens = resp.get("items", [])
-    rel.gravar_json("siconfi_anexos_relatorios", itens)
-    uniao = [a for a in itens if str(a.get("esfera", "")).upper() in ("U", "UNIÃO", "UNIAO")] or itens
-    rel(f"{len(itens)} anexos no catálogo; {len(uniao)} para a esfera U:\n")
-    for a in uniao:
-        rel(f"- {a}")
-    alvo = re.compile(r"(0?8|12|sa[uú]de|educa|mde)", re.I)
-    nomes = sorted({a.get("anexo") for a in uniao if a.get("demonstrativo", "").upper().startswith("RREO")
-                    and alvo.search(str(a.get("anexo")))})
-    for anexo in nomes:
-        if anexo in ANEXOS["rreo"]:
+    """Consulta o RREO da União sem `no_anexo` para listar os anexos que existem de fato
+    (o catálogo anexos-relatorios costuma estourar o tempo) e resume os de saúde/educação."""
+    params = {"an_exercicio": exercicio, "nr_periodo": 6, "co_tipo_demonstrativo": "RREO",
+              "id_ente": id_ente}
+    itens = siconfi.buscar_itens("rreo", params)
+    rel.gravar_json("siconfi_rreo_todos", itens)
+    contagem = Counter(i.get("anexo") for i in itens)
+    rel(f"{len(itens)} linhas no RREO {exercicio} p6. Anexos:\n")
+    for anexo, n in sorted(contagem.items(), key=lambda x: str(x[0])):
+        rel(f"- `{anexo}` → {n}")
+    alvo = re.compile(r"sa[uú]de|educa|mde|asps|ensino", re.I)
+    for anexo in sorted(contagem, key=str):
+        linhas = [i for i in itens if i.get("anexo") == anexo]
+        if not any(alvo.search(str(i.get("conta", ""))) for i in linhas):
             continue
-        rel(f"\n### RREO {exercicio} p6 — {anexo}\n")
-        params = {"an_exercicio": exercicio, "nr_periodo": 6, "co_tipo_demonstrativo": "RREO",
-                  "no_anexo": anexo, "id_ente": id_ente}
-        try:
-            its = siconfi.buscar_itens("rreo", params)
-        except Exception as e:
-            rel(f"**ERRO:** `{type(e).__name__}: {e}`")
-            continue
-        rel.gravar_json(f"siconfi_rreo_{anexo.replace(' ', '_')}", its)
-        _resumo_contas(rel, its)
+        rel(f"\n### RREO {exercicio} p6 — {anexo} (contas com saúde/educação)\n")
+        _resumo_contas(rel, linhas)
 
 
 def sidra(rel: Relatorio) -> None:
@@ -239,7 +234,7 @@ def main() -> int:
     rel.secao("SICONFI — entes", lambda: entes(rel))
     rel.secao(f"SICONFI — demonstrativos (id_ente={id_ente})",
               lambda: siconfi_demonstrativos(rel, args.exercicio, id_ente, mapa))
-    rel.secao("SICONFI — anexos disponíveis e RREO de saúde/educação",
+    rel.secao("SICONFI — anexos do RREO da União e contas de saúde/educação",
               lambda: anexos_disponiveis(rel, args.exercicio, id_ente))
     rel.secao("IBGE — SIDRA", lambda: sidra(rel))
     rel.secao("STN — RTN (CKAN)", lambda: rtn(rel))

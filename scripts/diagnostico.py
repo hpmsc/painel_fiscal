@@ -197,10 +197,10 @@ def anexos_disponiveis(rel: Relatorio, exercicio: int, id_ente: int) -> None:
     anexo14 = [i for i in itens if i.get("anexo") == "RREO-Anexo 14"]
     rel("\n### RREO-Anexo 14 — linhas mapeadas (valores brutos)\n")
     rel("| cod_conta | coluna | valor bruto |\n|---|---|---|")
-    for m in mapa_rreo(rel):
-        for it in anexo14:
-            if it.get("cod_conta") == m.get("cod_conta"):
-                rel(f"| {it.get('cod_conta')} | {it.get('coluna')} | {it.get('valor')} |")
+    contas = {m.get("cod_conta") for m in mapa_rreo(rel)}
+    for it in anexo14:
+        if it.get("cod_conta") in contas:
+            rel(f"| {it.get('cod_conta')} | {it.get('coluna')} | {it.get('valor')} |")
     import datetime as dt
     obs = siconfi.extrair(anexo14, [m for m in mapa_rreo(rel) if m.get("anexo") == "RREO-Anexo 14"],
                           dt.date.today(), dt.date.today(), "diag", 6)

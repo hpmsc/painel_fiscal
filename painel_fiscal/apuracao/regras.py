@@ -489,29 +489,36 @@ def r15_trajetoria_divida(regra, ctx: Contexto) -> Resultado:
     return res
 
 
-def _minimo_aplicado(regra, ctx: Contexto, pct: str, numerador: str, denominador: str) -> Resultado:
-    """Mínimos constitucionais: usa o % aplicado publicado no RREO (Anexo 14 da União);
-    sem ele, calcula numerador ÷ denominador."""
-    o = _preferida(ctx.base, pct)
-    if o is None:
-        return _razao_sobre(regra, ctx, numerador, denominador, regra.get("limite"), "minimo", "minimo")
+def _minimo_aplicado(regra, ctx: Contexto, aplicado: str, minimo: str, denominador: str) -> Resultado:
+    """Mínimos constitucionais. Com o valor mínimo publicado no RREO (Anexo 14 da União),
+    a base é mínimo ÷ piso e o % aplicado = aplicado ÷ base. Sem ele, aplicado ÷ denominador."""
+    ap = _preferida(ctx.base, aplicado)
+    mi = _preferida(ctx.base, minimo)
     piso = regra.get("limite")
-    res = _novo(regra, st.minimo(o.valor, piso), valor=o.valor, unidade="fracao", limite=piso,
-                tipo_limite="minimo", folga=o.valor - piso, **_datas(o))
-    valor = _preferida(ctx.base, numerador)
-    if valor is not None:
-        res.notas.append(f"Aplicado: R$ {valor.valor:,.1f} bi (% publicado no RREO).".replace(",", "."))
-    if o.data_referencia < dt.date(ctx.exercicio, 12, 1):
+    if ap is None or mi is None or not piso:
+        return _razao_sobre(regra, ctx, aplicado, denominador, piso, "minimo", "minimo")
+    base_calc = mi.valor / piso
+    pct = ap.valor / base_calc
+    res = _novo(regra, st.minimo(pct, piso), valor=pct, unidade="fracao", limite=piso,
+                tipo_limite="minimo", folga=pct - piso, **_datas(ap, mi))
+    res.extras.update({"aplicado_bi": ap.valor, "minimo_bi": mi.valor, "uso_do_minimo": ap.valor / mi.valor})
+    res.notas.append(f"Aplicado R$ {_br(ap.valor)} bi; mínimo R$ {_br(mi.valor)} bi "
+                     f"({_br(ap.valor / mi.valor * 100)}% do mínimo).")
+    if ap.data_referencia < dt.date(ctx.exercicio, 12, 1):
         res.notas.append("Apuração até o bimestre; o mínimo é anual.")
     return res
 
 
+def _br(v: float) -> str:
+    return f"{v:,.1f}".replace(",", "\u0001").replace(".", ",").replace("\u0001", ".")
+
+
 def r16_saude(regra, ctx):
-    return _minimo_aplicado(regra, ctx, "asps_pct_aplicado", "asps_bi", "rcl_bi")
+    return _minimo_aplicado(regra, ctx, "asps_bi", "asps_minimo_bi", "rcl_bi")
 
 
 def r17_educacao(regra, ctx):
-    return _minimo_aplicado(regra, ctx, "mde_pct_aplicado", "mde_bi", "receita_liquida_impostos_bi")
+    return _minimo_aplicado(regra, ctx, "mde_bi", "mde_minimo_bi", "receita_liquida_impostos_bi")
 
 
 # Ordem importa: R06 usa R01; R02 pode usar R03; R11 usa R09/R10.

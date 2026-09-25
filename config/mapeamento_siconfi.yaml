@@ -31,10 +31,13 @@ rreo:
   - {indicador: receitas_operacoes_credito_bi, anexo: "RREO-Anexo 09", cod_conta: ReceitasDeOperacoesDeCreditoRegraDeOuro, coluna: "^receitas realizadas$"}
   - {indicador: despesas_capital_bi,           anexo: "RREO-Anexo 09", cod_conta: DespesaDeCapitalLiquida,                 coluna: "^despesas empenhadas$"}
   # Saúde e educação: a União não publica os Anexos 8 e 12 no SICONFI; os valores estão no
-  # Anexo 14 (demonstrativo simplificado). "% Aplicado" vem em pontos percentuais → escala 0,01.
-  - {indicador: asps_bi,             anexo: "RREO-Anexo 14", cod_conta: AplicacaoTotalDasDespesasComAcoesEServicosPublicosDeSaude, coluna: "^valor apurado at[eé] o bimestre$"}
-  - {indicador: asps_pct_aplicado,   anexo: "RREO-Anexo 14", cod_conta: AplicacaoTotalDasDespesasComAcoesEServicosPublicosDeSaude, coluna: "^% aplicado at[eé] o bimestre$", escala: 0.01}
-  - {indicador: mde_bi,              anexo: "RREO-Anexo 14", cod_conta: MinimoAnualDasReceitasDeImpostosNaManutencaoEDesenvolvimentoDoEnsinoDemonstrativoSimplificado, coluna: "^valor apurado at[eé] o bimestre$"}
-  - {indicador: mde_pct_aplicado,    anexo: "RREO-Anexo 14", cod_conta: MinimoAnualDasReceitasDeImpostosNaManutencaoEDesenvolvimentoDoEnsinoDemonstrativoSimplificado, coluna: "^% aplicado at[eé] o bimestre$", escala: 0.01}
+  # Anexo 14 (demonstrativo simplificado). Atenção aos rótulos das colunas (2025):
+  #   "Valor Apurado Até o Bimestre"      → valor aplicado (R$)
+  #   "% Mínimo a Aplicar no Exercício"   → valor MÍNIMO em R$ (apesar do "%")
+  #   "% Aplicado Até o Bimestre"         → aplicado ÷ mínimo × 100 (não é % da base)
+  - {indicador: asps_bi,         anexo: "RREO-Anexo 14", cod_conta: AplicacaoTotalDasDespesasComAcoesEServicosPublicosDeSaude, coluna: "^valor apurado at[eé] o bimestre$"}
+  - {indicador: asps_minimo_bi,  anexo: "RREO-Anexo 14", cod_conta: AplicacaoTotalDasDespesasComAcoesEServicosPublicosDeSaude, coluna: "^% m[ií]nimo a aplicar no exerc[ií]cio$"}
+  - {indicador: mde_bi,          anexo: "RREO-Anexo 14", cod_conta: MinimoAnualDasReceitasDeImpostosNaManutencaoEDesenvolvimentoDoEnsinoDemonstrativoSimplificado, coluna: "^valor apurado at[eé] o bimestre$"}
+  - {indicador: mde_minimo_bi,   anexo: "RREO-Anexo 14", cod_conta: MinimoAnualDasReceitasDeImpostosNaManutencaoEDesenvolvimentoDoEnsinoDemonstrativoSimplificado, coluna: "^% m[ií]nimo a aplicar no exerc[ií]cio$"}
   # Primário acima da linha (OFSS, referência para a discrepância com o BCB)
   - {indicador: primario_gc_acima_linha_bi, anexo: "RREO-Anexo 14", cod_conta: ResultadoPrimarioDemonstrativoSimplificado, coluna: "^at[eé] o bimestre$"}

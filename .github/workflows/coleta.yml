@@ -28,7 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Sempre a main: o agendamento roda no branch padrão do repositório, que pode não ser a main.
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -61,7 +64,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Coleta automática: exercício $EXERCICIO ($(date -u +%Y-%m-%d))"
-          git push
+          git push origin HEAD:main
       # Commits do GITHUB_TOKEN não disparam "push"; workflow_dispatch é a exceção permitida.
       # Roda na main já com o commit dos dados, então o Painel publica a versão nova.
       - name: Republicar o painel

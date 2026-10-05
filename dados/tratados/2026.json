@@ -790,6 +790,72 @@
       "fonte": "siconfi_rgf_rgf-anexo_01",
       "data_coleta": "2026-09-25",
       "tipo": "realizado"
+    },
+    {
+      "indicador": "investimentos_ploa_bi",
+      "valor": 55.310428721,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-09-25",
+      "tipo": "projecao",
+      "nota": "GND 4, despesas primárias, projeto de lei (PLOA)"
+    },
+    {
+      "indicador": "dtp_legislativo_incl_tcu_bi",
+      "valor": 4.7018252653,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-28",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "limite_dtp_legislativo_incl_tcu_bi",
+      "valor": 13.9256565454,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-28",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_legislativo_incl_tcu",
+      "valor": 1,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-28",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dtp_judiciario_bi",
+      "valor": 5.234566748000001,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-28",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "limite_dtp_judiciario_bi",
+      "valor": 12.222030584250001,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-28",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_judiciario",
+      "valor": 19,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-09-28",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "despesas_discricionarias_empenhadas_bi",
+      "valor": 207.897024469,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-09-28",
+      "tipo": "realizado",
+      "nota": "RP 2,3,6,7,8,9, empenhado"
     }
   ]
 }

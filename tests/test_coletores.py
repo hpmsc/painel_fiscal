@@ -29,6 +29,8 @@ class SessaoFalsa:
         pagina = self.paginas[len(self.chamadas) - 1]
 
         class R:
+            status_code = 200
+
             def raise_for_status(self):
                 pass
 
@@ -120,6 +122,7 @@ def test_siop_investimentos_e_discricionarias(tmp_path):
     cfg = {"rp_primarias": [1, 2, 3, 6, 7, 8, 9], "rp_discricionarias": [2, 3, 6, 7, 8, 9]}
     obs = {o.indicador: o for o in siop.converter(siop.ler_csv(csv_), 2025, cfg, dt.date.today())}
     assert obs["investimentos_loa_bi"].valor == pytest.approx(65)          # 10+50+5, sem RP 0
+    assert obs["investimentos_ploa_bi"].valor == 0                          # coluna ploa zerada no teste
     assert obs["despesas_discricionarias_bi"].valor == pytest.approx(180)  # 55+120+5
     assert obs["despesas_discricionarias_bi"].tipo == "projecao"
     assert obs["despesas_discricionarias_empenhadas_bi"].valor == pytest.approx(131)
@@ -132,3 +135,47 @@ def test_siconfi_conta_blocos():
     mapa = [{"indicador": "n_blocos_dtp_mpu", "cod_conta": "DespesaComPessoalTotal", "coluna": "^valor$", "contar": True}]
     obs = siconfi.extrair(itens, mapa, dt.date(2026, 4, 30), dt.date.today(), "x", periodo=1)
     assert obs[0].valor == 2
+
+
+class RespostaHTTP:
+    def __init__(self, status, dados=None):
+        self.status_code, self.dados = status, dados
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            import requests
+            raise requests.HTTPError(f"{self.status_code}")
+
+    def json(self):
+        return self.dados
+
+
+class SessaoInstavel:
+    def __init__(self, respostas):
+        self.respostas, self.chamadas = list(respostas), 0
+
+    def get(self, url, params=None, timeout=None, headers=None):
+        self.chamadas += 1
+        return self.respostas.pop(0)
+
+
+def test_obter_json_repete_em_erro_transitorio(monkeypatch):
+    from painel_fiscal.coletores import base
+    monkeypatch.setattr(base.time, "sleep", lambda s: None)
+    sessao = SessaoInstavel([RespostaHTTP(502), RespostaHTTP(503), RespostaHTTP(200, [1])])
+    assert base.obter_json("u", sessao=sessao) == [1]
+    assert sessao.chamadas == 3
+
+
+def test_obter_json_desiste_apos_tentativas_e_nao_repete_4xx(monkeypatch):
+    import requests
+    from painel_fiscal.coletores import base
+    monkeypatch.setattr(base.time, "sleep", lambda s: None)
+    sessao = SessaoInstavel([RespostaHTTP(502)] * base.TENTATIVAS)
+    with pytest.raises(requests.HTTPError):
+        base.obter_json("u", sessao=sessao)
+    assert sessao.chamadas == base.TENTATIVAS
+    sessao = SessaoInstavel([RespostaHTTP(404)])
+    with pytest.raises(requests.HTTPError):
+        base.obter_json("u", sessao=sessao)
+    assert sessao.chamadas == 1

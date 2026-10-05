@@ -28,17 +28,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Sempre a main: o agendamento roda no branch padrão do repositório, que pode não ser a main.
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
+      # Cada fonte segue mesmo se outra falhar: o que foi coletado é gravado e o job termina
+      # vermelho no último passo, apontando a fonte que falhou.
       - name: BCB (primário, DBGG, DLSP)
+        id: bcb
+        continue-on-error: true
         run: python -m painel_fiscal coletar-bcb --exercicio "$EXERCICIO" --desde "$((EXERCICIO - 1))-01-01"
       - name: SICONFI RGF (quadrimestres publicados)
+        id: rgf
+        continue-on-error: true
         run: python -m painel_fiscal coletar-siconfi --exercicio "$EXERCICIO" --demonstrativo rgf --periodo 1 2 3
       - name: SICONFI RREO (bimestres publicados)
+        id: rreo
+        continue-on-error: true
         run: python -m painel_fiscal coletar-siconfi --exercicio "$EXERCICIO" --demonstrativo rreo --periodo 1 2 3 4 5 6
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -46,6 +57,8 @@ jobs:
       - name: Instalar orcamentoBR
         run: Rscript -e 'install.packages("orcamentoBR")'
       - name: SIOP (dotação e execução por RP x GND)
+        id: siop
+        continue-on-error: true
         run: |
           Rscript scripts/coleta_siop.R "$EXERCICIO"
           python -m painel_fiscal coletar-siop --exercicio "$EXERCICIO"
@@ -61,10 +74,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Coleta automática: exercício $EXERCICIO ($(date -u +%Y-%m-%d))"
-          git push
+          git push origin HEAD:main
       # Commits do GITHUB_TOKEN não disparam "push"; workflow_dispatch é a exceção permitida.
       # Roda na main já com o commit dos dados, então o Painel publica a versão nova.
       - name: Republicar o painel
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run painel.yml --ref main --repo "$GITHUB_REPOSITORY"
+      - name: Fontes com falha
+        if: steps.bcb.outcome == 'failure' || steps.rgf.outcome == 'failure' || steps.rreo.outcome == 'failure' || steps.siop.outcome == 'failure'
+        run: |
+          echo "::error::Coleta incompleta. BCB: ${{ steps.bcb.outcome }}; RGF: ${{ steps.rgf.outcome }}; RREO: ${{ steps.rreo.outcome }}; SIOP: ${{ steps.siop.outcome }}"
+          exit 1

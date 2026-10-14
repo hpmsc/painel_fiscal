@@ -1,0 +1,37 @@
+name: Diagnóstico — fundos
+
+# Confere as fontes da base de fundos (CVM, BCB CDI e CADPREV) contra as respostas reais.
+# Não altera o repositório: o resultado fica no resumo do job e no artefato.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - fundos/**
+      - scripts/diagnostico_fundos.py
+      - config/fundos_fontes.yaml
+      - .github/workflows/diagnostico_fundos.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostico:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Consultar fontes
+        run: python scripts/diagnostico_fundos.py --saida diagnostico
+      - name: Resumo do job
+        if: always()
+        run: head -c 900000 diagnostico/resumo_fundos.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: diagnostico-fundos
+          path: diagnostico/

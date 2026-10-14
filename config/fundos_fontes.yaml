@@ -1,0 +1,24 @@
+# Fontes da base de fundos (pacote `fundos/`). Itens "⚠ verificar" são conferidos pelo
+# workflow "Diagnóstico — fundos", que roda no GitHub Actions (com acesso às fontes).
+
+universo: config/fundos_universo.csv   # CNPJs coletados (hoje: os 387 fundos da Matriz)
+
+cvm:
+  # Endereços em fundos/cvm.py (informe diário mensal, HIST/ anual e registro_fundo_classe).
+  ano_inicial: 2010            # primeiro ano de retorno anual (igual à Matriz)
+
+cadprev:
+  # DAIR — Demonstrativo de Aplicações e Investimentos dos Recursos.
+  # ⚠ verificar: endereço e parâmetros da consulta pública/API. Enquanto não confirmados,
+  # use `python -m fundos importar-cadprev --arquivo <csv baixado do CADPREV>`.
+  api:
+    url: https://apicadprev.trabalho.gov.br/DAIR_CARTEIRA     # ⚠ verificar
+    parametros: {ano: "{ano}", mes: "{mes}", uf: "{uf}"}       # ⚠ verificar
+    candidatos_diagnostico:                                   # endereços sondados pelo diagnóstico
+      - https://apicadprev.trabalho.gov.br/
+      - https://apicadprev.trabalho.gov.br/DAIR_CARTEIRA
+      - https://cadprev.previdencia.gov.br/Cadprev/pages/publico/dair/consultarDemonstrativos.xhtml
+  ente:
+    uf: PA
+    nome: IGEPPS                 # usado para marcar os fundos da carteira do instituto
+    cnpj: ""                     # ⚠ preencher com o CNPJ do ente/unidade gestora no CADPREV

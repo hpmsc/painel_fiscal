@@ -57,6 +57,23 @@ As fontes sem API (Relatório Bimestral, LOA, LDO) continuam em
 O workflow `.github/workflows/diagnostico.yml` confere as fontes contra um exercício
 fechado e mostra, no resumo do job, se cada item do mapeamento é encontrado.
 
+## Base de fundos (Matriz de Indicadores)
+
+O pacote `fundos/` coleta CVM (informe diário e cadastro), CDI do BCB e carteiras DAIR do
+CADPREV para os fundos de `config/fundos_universo.csv` e grava os indicadores em
+`dados/fundos/metricas.json`. Detalhes e pendências em [`docs/fundos_fontes.md`](docs/fundos_fontes.md).
+
+```bash
+python -m fundos coletar-cvm --desde 2024-01
+python -m fundos cadastro-cvm
+python -m fundos coletar-cdi
+python -m fundos importar-cadprev --arquivo dair.csv --competencia 2026-08
+python -m fundos calcular
+```
+
+Workflows: **Coleta — fundos** (semanal, commit na `main`) e **Diagnóstico — fundos**
+(confere formatos e endereços das fontes).
+
 ## Estrutura
 
 ```

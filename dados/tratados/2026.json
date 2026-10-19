@@ -1017,6 +1017,72 @@
       "data_coleta": "2026-10-12",
       "tipo": "realizado",
       "nota": "RP 2,3,6,7,8,9, empenhado"
+    },
+    {
+      "indicador": "dbgg_pct_pib",
+      "valor": 80.09,
+      "data_referencia": "2026-04-30",
+      "fonte": "bcb_sgs:13762",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dbgg_pct_pib",
+      "valor": 82.55,
+      "data_referencia": "2026-07-31",
+      "fonte": "bcb_sgs:13762",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dbgg_pct_pib",
+      "valor": 82.87,
+      "data_referencia": "2026-08-31",
+      "fonte": "bcb_sgs:13762",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dlsp_pct_pib",
+      "valor": 67.88,
+      "data_referencia": "2026-05-31",
+      "fonte": "bcb_sgs:4513",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dlsp_pct_pib",
+      "valor": 69.11,
+      "data_referencia": "2026-07-31",
+      "fonte": "bcb_sgs:4513",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dlsp_pct_pib",
+      "valor": 69.27,
+      "data_referencia": "2026-08-31",
+      "fonte": "bcb_sgs:4513",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "despesas_discricionarias_bi",
+      "valor": 300.3383853,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-19",
+      "tipo": "projecao",
+      "nota": "RP 2,3,6,7,8,9, dotação atualizada"
+    },
+    {
+      "indicador": "despesas_discricionarias_empenhadas_bi",
+      "valor": 222.363475703,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado",
+      "nota": "RP 2,3,6,7,8,9, empenhado"
     }
   ]
 }

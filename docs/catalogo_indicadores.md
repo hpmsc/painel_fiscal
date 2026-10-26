@@ -19,8 +19,10 @@ dívida em **% do PIB** (ex.: 79,2). `tipo`: `realizado` (BCB, RTN, SICONFI) ou
 | `limite_despesa_anterior_bi`, `ipca_12m_jun` | R02 (cálculo alternativo) | realizado | LOA anterior; IBGE | Usados só se `limite_despesa_bi` faltar |
 | `variacao_real_receita_primaria_12m_jun` | R03 | realizado | STN RTN + IPCA | 12 meses até junho do ano anterior |
 | `meta_ano_anterior_cumprida` | R03 | realizado | apuração do ano anterior | booleano |
-| `investimentos_loa_bi` | R05 | projecao | SIOP (orcamentoBR) | GND 4 das despesas primárias (RP em `fontes.siop.rp_primarias`), dotação da LOA |
-| `pib_estimado_ploa_bi` | R05 | projecao | PLOA (carga manual) | |
+| `investimentos_ploa_bi` | R05 | projecao | SIOP (orcamentoBR), coluna PLOA | GND 4 das despesas primárias do OFSS no projeto de lei. 2026: R$ 55,3 bi |
+| `investimentos_loa_bi` | R05 (reserva) | projecao | SIOP (orcamentoBR) | Dotação da LOA; usada só se faltar o valor do PLOA |
+| `investimentos_estatais_ploa_bi` | R05 | projecao | PLOA (carga manual) | Orçamento de Investimento das estatais; entra se `R05.parametros.incluir_estatais`. 2026: R$ 197,9 bi |
+| `pib_estimado_ploa_bi` | R05 | projecao | PLOA (carga manual) | 2026: R$ 13.826 bi |
 | `fator_ipca_desde_jan2023` | R06 | realizado | IBGE | Fator acumulado (ex.: 1,17) |
 | `contingenciamento_bi` | R07; R01 | projecao | Relatório Bimestral; decretos (carga manual) | Não está no SIOP. Na projeção do R01, é somado ao resultado ajustado (a limitação de empenho reduz a despesa) |
 | `despesas_discricionarias_bi` | R07 | projecao | SIOP (orcamentoBR) | RP em `fontes.siop.rp_discricionarias`, dotação atualizada |

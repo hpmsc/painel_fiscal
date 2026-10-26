@@ -55,9 +55,14 @@ regras:
   - id: R05
     nome: "Piso de investimentos"
     base_legal: ["LC 200/2023 art. 10"]
-    indicador: "investimentos_loa / pib_estimado_ploa"
+    indicador: "(investimentos OFSS no PLOA + investimentos das estatais no PLOA) / pib_estimado_ploa"
     limite: 0.006
     tipo_limite: minimo
+    parametros:
+      # A Consultoria de Orçamento (Senado/Câmara) compara o piso (R$ 83 bi = 0,6% do PIB do
+      # PLOA 2026) com o total OFSS + Orçamento de Investimento das estatais (R$ 253,2 bi = 1,83%).
+      # Só OFSS: R$ 55,3 bi = 0,40%. ⚠ confirmar a leitura na redação da LC 200/2023, art. 10.
+      incluir_estatais: true
     fonte: [siop, ploa]
     frequencia: anual
     verificar: true

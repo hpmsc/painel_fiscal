@@ -256,3 +256,20 @@ def test_r01_fontes_e_r06_sem_excesso_com_relatorio(params, base):
     assert res["R06"].valor == 0
     assert any("não há excesso" in n for n in res["R06"].notas)
     assert not any("IPCA" in n for n in res["R06"].notas)
+
+
+def test_r05_piso_no_ploa_com_estatais(params, base):
+    # PLOA 2026: OFSS 55,31 (SIOP) + estatais 197,9; PIB 13.826 → 1,83%; piso 0,6% = R$ 83,0 bi
+    b = base(2026, obs("investimentos_ploa_bi", 55.31, "2026-12-31", "projecao"),
+             obs("investimentos_loa_bi", 80.82, "2026-12-31", "projecao"),
+             obs("investimentos_estatais_ploa_bi", 197.9, "2026-12-31", "projecao"),
+             obs("pib_estimado_ploa_bi", 13826.0, "2026-12-31", "projecao"))
+    r = por_id(params, 2026, b)["R05"]
+    assert r.valor == pytest.approx(253.21 / 13826)
+    assert r.status == st.CUMPRE
+    assert r.extras["piso_bi"] == pytest.approx(82.956)
+    assert any("Só OFSS" in n for n in r.notas)
+    # sem as estatais, o OFSS sozinho fica abaixo do piso
+    b2 = base(2026, obs("investimentos_ploa_bi", 55.31, "2026-12-31", "projecao"),
+              obs("pib_estimado_ploa_bi", 13826.0, "2026-12-31", "projecao"))
+    assert por_id(params, 2026, b2)["R05"].status == st.DESCUMPRE

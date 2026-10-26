@@ -9,7 +9,7 @@
 # leva o resultado ao piso da banda (R$ 0).
 #
 # Ainda NÃO preenchido (não divulgado nas fontes consultadas): limite e despesa sujeita ao
-# limite por Poder (R02), detalhamento das deduções do 4º bimestre, PIB estimado no PLOA (R05).
+# limite por Poder (R02) e detalhamento das deduções do 4º bimestre.
 exercicio: 2026
 observacoes:
   - indicador: primario_gc_abaixo_linha_bi
@@ -40,3 +40,22 @@ observacoes:
     data_coleta: 2026-09-25
     fonte: rardp_4bim_2026
     nota: "Bloqueio para o limite de despesas (LC 200/2023); 3º bim.: 17,9"
+
+  # PLOA 2026 (enviado em 29/08/2025) — parâmetros para o piso de investimentos (R05).
+  # PIB nominal de 2026 estimado no PLOA; confere com a Nota Técnica Conjunta PLOA 2026
+  # (Consultorias de Orçamento do Senado e da Câmara): piso de R$ 83 bi = 0,6% do PIB e
+  # investimentos de R$ 253,2 bi = 1,83% do PIB.
+  - indicador: pib_estimado_ploa_bi
+    valor: 13826.0
+    tipo: projecao
+    data_referencia: 2026-12-31
+    data_coleta: 2026-09-25
+    fonte: ploa_2026
+    nota: "PIB nominal de 2026 estimado no PLOA 2026 (R$ 13,826 tri)"
+  - indicador: investimentos_estatais_ploa_bi
+    valor: 197.9
+    tipo: projecao
+    data_referencia: 2026-12-31
+    data_coleta: 2026-09-25
+    fonte: ploa_2026
+    nota: "Orçamento de Investimento das estatais no PLOA 2026 (Nota Técnica Conjunta). OFSS: R$ 55,3 bi (SIOP)"

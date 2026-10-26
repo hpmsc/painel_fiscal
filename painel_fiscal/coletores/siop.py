@@ -44,6 +44,8 @@ def converter(linhas: list[dict[str, Any]], exercicio: int, cfg: dict[str, Any],
     return [
         obs("investimentos_loa_bi", _soma(linhas, cfg.get("coluna_investimentos", "loa"), rp_prim, {"4"}),
             "projecao", "GND 4, despesas primárias, dotação da LOA"),
+        obs("investimentos_ploa_bi", _soma(linhas, "ploa", rp_prim, {"4"}),
+            "projecao", "GND 4, despesas primárias, projeto de lei (PLOA)"),
         obs("despesas_discricionarias_bi", _soma(linhas, "loa_mais_credito", rp_disc),
             "projecao", "RP " + ",".join(sorted(rp_disc)) + ", dotação atualizada"),
         obs("despesas_discricionarias_empenhadas_bi", _soma(linhas, "empenhado", rp_disc),

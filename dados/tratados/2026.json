@@ -792,6 +792,317 @@
       "tipo": "realizado"
     },
     {
+      "indicador": "dbgg_pct_pib",
+      "valor": 82.86,
+      "data_referencia": "2026-08-31",
+      "fonte": "bcb_sgs:13762",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dlsp_pct_pib",
+      "valor": 69.26,
+      "data_referencia": "2026-08-31",
+      "fonte": "bcb_sgs:4513",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "primario_gc_abaixo_linha_bi",
+      "valor": -97.08673999999999,
+      "data_referencia": "2026-08-31",
+      "fonte": "bcb_sgs:4639",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado",
+      "nota": "acumulado no ano"
+    },
+    {
+      "indicador": "dcl_bi",
+      "valor": 8824.947944287369,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_02",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "garantias_bi",
+      "valor": 370.88723245121,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_03",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "limite_garantias_senado_bi",
+      "valor": 971.5574332670001,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_03",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "rcl_bi",
+      "valor": 1619.2623887783302,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_04",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "operacoes_credito_rgf_bi",
+      "valor": 212.4143618359,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_04",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "limite_operacoes_credito_senado_bi",
+      "valor": 971.5574332670001,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_04",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dtp_executivo_bi",
+      "valor": 322.06672839903007,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "limite_dtp_executivo_bi",
+      "valor": 653.6638498510099,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_executivo",
+      "valor": 4,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dtp_legislativo_incl_tcu_bi",
+      "valor": 12.57649974007,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "limite_dtp_legislativo_incl_tcu_bi",
+      "valor": 40.481559721370004,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_legislativo_incl_tcu",
+      "valor": 3,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dtp_judiciario_bi",
+      "valor": 45.78745423274001,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "limite_dtp_judiciario_bi",
+      "valor": 103.61660025793998,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_judiciario",
+      "valor": 65,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dtp_mpu_bi",
+      "valor": 7.311932269720001,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "limite_dtp_mpu_bi",
+      "valor": 11.86919330975,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "n_blocos_dtp_mpu",
+      "valor": 2,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rgf_rgf-anexo_01",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "asps_bi",
+      "valor": 154.75031307228002,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rreo_rreo-anexo_14",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "asps_minimo_bi",
+      "valor": 173.11490113213003,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rreo_rreo-anexo_14",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "mde_bi",
+      "valor": 81.73981310571001,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rreo_rreo-anexo_14",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "mde_minimo_bi",
+      "valor": 92.73665578082002,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rreo_rreo-anexo_14",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "primario_gc_acima_linha_bi",
+      "valor": -94.86947860232002,
+      "data_referencia": "2026-08-31",
+      "fonte": "siconfi_rreo_rreo-anexo_14",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "despesas_discricionarias_bi",
+      "valor": 300.355572457,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-12",
+      "tipo": "projecao",
+      "nota": "RP 2,3,6,7,8,9, dotação atualizada"
+    },
+    {
+      "indicador": "despesas_discricionarias_empenhadas_bi",
+      "valor": 216.385731456,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-12",
+      "tipo": "realizado",
+      "nota": "RP 2,3,6,7,8,9, empenhado"
+    },
+    {
+      "indicador": "dbgg_pct_pib",
+      "valor": 80.09,
+      "data_referencia": "2026-04-30",
+      "fonte": "bcb_sgs:13762",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dbgg_pct_pib",
+      "valor": 82.55,
+      "data_referencia": "2026-07-31",
+      "fonte": "bcb_sgs:13762",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dbgg_pct_pib",
+      "valor": 82.87,
+      "data_referencia": "2026-08-31",
+      "fonte": "bcb_sgs:13762",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dlsp_pct_pib",
+      "valor": 67.88,
+      "data_referencia": "2026-05-31",
+      "fonte": "bcb_sgs:4513",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dlsp_pct_pib",
+      "valor": 69.11,
+      "data_referencia": "2026-07-31",
+      "fonte": "bcb_sgs:4513",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dlsp_pct_pib",
+      "valor": 69.27,
+      "data_referencia": "2026-08-31",
+      "fonte": "bcb_sgs:4513",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "despesas_discricionarias_bi",
+      "valor": 300.3383853,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-19",
+      "tipo": "projecao",
+      "nota": "RP 2,3,6,7,8,9, dotação atualizada"
+    },
+    {
+      "indicador": "despesas_discricionarias_empenhadas_bi",
+      "valor": 222.363475703,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-19",
+      "tipo": "realizado",
+      "nota": "RP 2,3,6,7,8,9, empenhado"
+    },
+    {
+      "indicador": "despesas_discricionarias_bi",
+      "valor": 300.640013445,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-26",
+      "tipo": "projecao",
+      "nota": "RP 2,3,6,7,8,9, dotação atualizada"
+    },
+    {
+      "indicador": "despesas_discricionarias_empenhadas_bi",
+      "valor": 226.532156947,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-26",
+      "tipo": "realizado",
+      "nota": "RP 2,3,6,7,8,9, empenhado"
+    },
+    {
       "indicador": "investimentos_ploa_bi",
       "valor": 55.310428721,
       "data_referencia": "2026-12-31",

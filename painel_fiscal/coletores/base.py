@@ -21,17 +21,17 @@ ESPERA_S = 5          # espera antes da 2ª tentativa; dobra a cada nova falha
 
 def obter_json(url: str, params: dict[str, Any] | None = None,
                sessao: requests.Session | None = None, timeout: int = TIMEOUT) -> Any:
-    """GET com novas tentativas para falhas transitórias (5xx, 429, timeout, conexão)."""
+    """GET com novas tentativas para falhas transitórias (5xx, 429, timeout, conexão, corpo não JSON)."""
     s = sessao or requests
     for tentativa in range(1, TENTATIVAS + 1):
         try:
             r = s.get(url, params=params, timeout=timeout, headers=CABECALHOS)
             if r.status_code != 429 and r.status_code < 500:
                 r.raise_for_status()
-                return r.json()
+                return r.json()      # corpo que não é JSON (página de manutenção) também repete
             if tentativa == TENTATIVAS:
                 r.raise_for_status()
-        except (requests.ConnectionError, requests.Timeout):
+        except (requests.ConnectionError, requests.Timeout, requests.JSONDecodeError):
             if tentativa == TENTATIVAS:
                 raise
         time.sleep(ESPERA_S * 2 ** (tentativa - 1))

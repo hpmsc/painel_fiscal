@@ -147,6 +147,9 @@ class RespostaHTTP:
             raise requests.HTTPError(f"{self.status_code}")
 
     def json(self):
+        if self.dados is None:
+            import requests
+            raise requests.JSONDecodeError("Expecting value", "<html>", 0)
         return self.dados
 
 
@@ -179,3 +182,11 @@ def test_obter_json_desiste_apos_tentativas_e_nao_repete_4xx(monkeypatch):
     with pytest.raises(requests.HTTPError):
         base.obter_json("u", sessao=sessao)
     assert sessao.chamadas == 1
+
+
+def test_obter_json_repete_quando_corpo_nao_e_json(monkeypatch):
+    from painel_fiscal.coletores import base
+    monkeypatch.setattr(base.time, "sleep", lambda s: None)
+    sessao = SessaoInstavel([RespostaHTTP(200), RespostaHTTP(200, {"ok": 1})])
+    assert base.obter_json("u", sessao=sessao) == {"ok": 1}
+    assert sessao.chamadas == 2

@@ -1083,6 +1083,24 @@
       "data_coleta": "2026-10-19",
       "tipo": "realizado",
       "nota": "RP 2,3,6,7,8,9, empenhado"
+    },
+    {
+      "indicador": "despesas_discricionarias_bi",
+      "valor": 300.640013445,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-26",
+      "tipo": "projecao",
+      "nota": "RP 2,3,6,7,8,9, dotação atualizada"
+    },
+    {
+      "indicador": "despesas_discricionarias_empenhadas_bi",
+      "valor": 226.532156947,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-10-26",
+      "tipo": "realizado",
+      "nota": "RP 2,3,6,7,8,9, empenhado"
     }
   ]
 }

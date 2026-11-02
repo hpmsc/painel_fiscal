@@ -1103,6 +1103,49 @@
       "nota": "RP 2,3,6,7,8,9, empenhado"
     },
     {
+      "indicador": "dbgg_pct_pib",
+      "valor": 82.93,
+      "data_referencia": "2026-09-30",
+      "fonte": "bcb_sgs:13762",
+      "data_coleta": "2026-11-02",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "dlsp_pct_pib",
+      "valor": 69.98,
+      "data_referencia": "2026-09-30",
+      "fonte": "bcb_sgs:4513",
+      "data_coleta": "2026-11-02",
+      "tipo": "realizado"
+    },
+    {
+      "indicador": "primario_gc_abaixo_linha_bi",
+      "valor": -93.61725,
+      "data_referencia": "2026-09-30",
+      "fonte": "bcb_sgs:4639",
+      "data_coleta": "2026-11-02",
+      "tipo": "realizado",
+      "nota": "acumulado no ano"
+    },
+    {
+      "indicador": "despesas_discricionarias_bi",
+      "valor": 300.572856576,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-11-02",
+      "tipo": "projecao",
+      "nota": "RP 2,3,6,7,8,9, dotação atualizada"
+    },
+    {
+      "indicador": "despesas_discricionarias_empenhadas_bi",
+      "valor": 230.476101927,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-11-02",
+      "tipo": "realizado",
+      "nota": "RP 2,3,6,7,8,9, empenhado"
+    },
+    {
       "indicador": "investimentos_ploa_bi",
       "valor": 55.310428721,
       "data_referencia": "2026-12-31",

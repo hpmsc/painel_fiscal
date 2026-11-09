@@ -1146,6 +1146,24 @@
       "nota": "RP 2,3,6,7,8,9, empenhado"
     },
     {
+      "indicador": "despesas_discricionarias_bi",
+      "valor": 300.555356576,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-11-09",
+      "tipo": "projecao",
+      "nota": "RP 2,3,6,7,8,9, dotação atualizada"
+    },
+    {
+      "indicador": "despesas_discricionarias_empenhadas_bi",
+      "valor": 234.51375817,
+      "data_referencia": "2026-12-31",
+      "fonte": "siop:orcamentoBR",
+      "data_coleta": "2026-11-09",
+      "tipo": "realizado",
+      "nota": "RP 2,3,6,7,8,9, empenhado"
+    },
+    {
       "indicador": "investimentos_ploa_bi",
       "valor": 55.310428721,
       "data_referencia": "2026-12-31",

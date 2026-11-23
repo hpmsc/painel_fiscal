@@ -1,25 +1,26 @@
 "exercicio";"rp_cod";"rp_desc";"gnd_cod";"gnd_desc";"ploa";"loa";"loa_mais_credito";"empenhado";"liquidado";"pago"
 2026;"0";"Financeira";"9";"Reserva de Contingência";35182872657;35301028685;35278243668;0;0;0
 2026;"2";"Primária discricionária, considerada no cálculo do RP";"9";"Reserva de Contingência";42052782297;1249276419;5972527;0;0;0
-2026;"0";"Financeira";"1";"Pessoal e Encargos Sociais";29659585596;29659538597;29686498402;26038532623;21165488962;20874261208
+2026;"0";"Financeira";"1";"Pessoal e Encargos Sociais";29659585596;29659538597;29686498402;26068162597;21566810469;21103236377
+2026;"0";"Financeira";"4";"Investimentos";0;0;5e+06;0;0;0
 2026;"6";"Primária discricionária, decorrente de emendas individuais, considerada no cálculo do RP";"5";"Inversões Financeiras";0;2350000;3450000;3240896;3240896;3240896
-2026;"8";"Primária discricionária, decorrente de emendas de comissão permanente do SF, da CD e de comissão mista permanente do CN, considerada no cálculo do RP";"4";"Investimentos";0;5073416999;5206416999;3946020133;278118464;220244709
-2026;"1";"Primária obrigatória, considerada no cálculo do RP";"1";"Pessoal e Encargos Sociais";459884819324;459886019324;448513354252;415920872846;354767684967;349686715597
-2026;"2";"Primária discricionária, considerada no cálculo do RP";"5";"Inversões Financeiras";14128983356;13858324326;19103840611;17629109438;16907704966;16907704966
-2026;"1";"Primária obrigatória, considerada no cálculo do RP";"3";"Outras Despesas Correntes";2485266835093;2484116245714;2526804235160;2291646091700;2079468151525;2077267831396
-2026;"2";"Primária discricionária, considerada no cálculo do RP";"4";"Investimentos";10244828713;20091740069;15067516207;9405622245;3401636742;3146621091
-2026;"0";"Financeira";"2";"Juros e Encargos da Dívida";643939797050;643939797050;643939797050;503931290668;498597846013;498597846013
-2026;"7";"Primária discricionária, decorrente de emendas de bancada estadual, considerada no cálculo do RP";"3";"Outras Despesas Correntes";0;7241750091;7340326947;6233564322;4850594854;4818424826
-2026;"2";"Primária discricionária, considerada no cálculo do RP";"3";"Outras Despesas Correntes";123714244197;121011568250;162281748342;128670645413;106333264564;104117510369
-2026;"7";"Primária discricionária, decorrente de emendas de bancada estadual, considerada no cálculo do RP";"4";"Investimentos";0;3983561528;3884984672;1436324803;263059325;113760656
-2026;"1";"Primária obrigatória, considerada no cálculo do RP";"5";"Inversões Financeiras";3279871478;3279871478;3279871478;3202621176;3202621174;3202621174
-2026;"3";"Primária discricionária, PAC, considerada no cálculo do RP";"3";"Outras Despesas Correntes";5905431124;5696896667;6970899846;6190814495;4925275121;4765014291
-2026;"0";"Financeira";"6";"Amortização da Dívida";2220511416421;2220511416421;2220511416421;1876476780563;1837889626570;1837889626570
-2026;"0";"Financeira";"5";"Inversões Financeiras";205238158582;205150268554;318180549069;294445889583;237838687871;237833891809
-2026;"0";"Financeira";"3";"Outras Despesas Correntes";2130018631;2130018631;2131264759;830452472;829693838;829676892
-2026;"6";"Primária discricionária, decorrente de emendas individuais, considerada no cálculo do RP";"4";"Investimentos";0;9543865125;9436220540;7906264907;6198522000;6134490535
-2026;"3";"Primária discricionária, PAC, considerada no cálculo do RP";"4";"Investimentos";41073069214;38135847352;45188398842;34102489388;21478390684;20985433500
-2026;"1";"Primária obrigatória, considerada no cálculo do RP";"4";"Investimentos";3992530794;3992530794;4926725442;4453844232;2318127154;2201153857
-2026;"8";"Primária discricionária, decorrente de emendas de comissão permanente do SF, da CD e de comissão mista permanente do CN, considerada no cálculo do RP";"3";"Outras Despesas Correntes";0;7041833001;6908833001;6085553583;5175469248;5146876256
-2026;"3";"Primária discricionária, PAC, considerada no cálculo do RP";"5";"Inversões Financeiras";5950711785;6412874782;2023620440;1171152057;1116520744;1116520744
-2026;"6";"Primária discricionária, decorrente de emendas individuais, considerada no cálculo do RP";"3";"Outras Despesas Correntes";0;17014710017;17121254602;16080733400;11982007053;11907517862
+2026;"8";"Primária discricionária, decorrente de emendas de comissão permanente do SF, da CD e de comissão mista permanente do CN, considerada no cálculo do RP";"4";"Investimentos";0;5073416999;5206416999;3986158458;289119025;233907400
+2026;"1";"Primária obrigatória, considerada no cálculo do RP";"1";"Pessoal e Encargos Sociais";459884819324;459886019324;448479465410;420933268499;364864701853;352581467605
+2026;"2";"Primária discricionária, considerada no cálculo do RP";"5";"Inversões Financeiras";14128983356;13858324326;19555428547;17629857877;16910106374;16909968599
+2026;"1";"Primária obrigatória, considerada no cálculo do RP";"3";"Outras Despesas Correntes";2485266835093;2484116245714;2526824810463;2440524773895;2091949748758;2082389720853
+2026;"2";"Primária discricionária, considerada no cálculo do RP";"4";"Investimentos";10244828713;20091740069;15117668436;9654063180;3559193873;3299036380
+2026;"0";"Financeira";"2";"Juros e Encargos da Dívida";643939797050;643939797050;643939797050;532776780525;528044845364;528044845364
+2026;"7";"Primária discricionária, decorrente de emendas de bancada estadual, considerada no cálculo do RP";"3";"Outras Despesas Correntes";0;7241750091;7340326947;6275763230;4859025906;4824059740
+2026;"2";"Primária discricionária, considerada no cálculo do RP";"3";"Outras Despesas Correntes";123714244197;121011568250;161803083716;130217671085;108149191431;105814568853
+2026;"7";"Primária discricionária, decorrente de emendas de bancada estadual, considerada no cálculo do RP";"4";"Investimentos";0;3983561528;3884984672;1442221473;268746001;115462920
+2026;"1";"Primária obrigatória, considerada no cálculo do RP";"5";"Inversões Financeiras";3279871478;3279871478;3279871478;3203029559;3202784671;3202621174
+2026;"3";"Primária discricionária, PAC, considerada no cálculo do RP";"3";"Outras Despesas Correntes";5905431124;5696896667;6953439570;6234152124;4979329549;4835598359
+2026;"0";"Financeira";"6";"Amortização da Dívida";2220511416421;2220511416421;2220511416421;1881727458739;1854995786660;1854995786660
+2026;"0";"Financeira";"5";"Inversões Financeiras";205238158582;205150268554;319201145986;294610876027;239014569582;238608634739
+2026;"0";"Financeira";"3";"Outras Despesas Correntes";2130018631;2130018631;2165284823;830452472;829802551;829786195
+2026;"6";"Primária discricionária, decorrente de emendas individuais, considerada no cálculo do RP";"4";"Investimentos";0;9543865125;9436220540;7944188672;6214202620;6137951136
+2026;"3";"Primária discricionária, PAC, considerada no cálculo do RP";"4";"Investimentos";41073069214;38135847352;45205859118;34406297805;22245109316;21673152431
+2026;"1";"Primária obrigatória, considerada no cálculo do RP";"4";"Investimentos";3992530794;3992530794;4926858650;4485146230;2532186300;2251089451
+2026;"8";"Primária discricionária, decorrente de emendas de comissão permanente do SF, da CD e de comissão mista permanente do CN, considerada no cálculo do RP";"3";"Outras Despesas Correntes";0;7041833001;6908833001;6097827210;5191321631;5160131388
+2026;"3";"Primária discricionária, PAC, considerada no cálculo do RP";"5";"Inversões Financeiras";5950711785;6412874782;2023620440;1171152057;1152920744;1150791344
+2026;"6";"Primária discricionária, decorrente de emendas individuais, considerada no cálculo do RP";"3";"Outras Despesas Correntes";0;17014710017;17121254602;16150640377;12014930000;11925223830
